@@ -1,4 +1,4 @@
-import { Mic, Film, Brain, Home, Star, BookOpen, Badge } from "lucide-react";
+import { Mic, Film, Brain, Home, Star, Badge } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BlogPosts } from "./components/BlogPosts";
 
