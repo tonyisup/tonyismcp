@@ -16,7 +16,7 @@ export function BlogPosts({ blogPosts }: BlogPostsProps) {
   const [posts, setPosts] = useState<typeof blogPosts>([]);
   useEffect(() => {
     setTimeout(() => setPosts(blogPosts), 500);
-  }, []);
+  });
   
   return (
     <section className="mt-12">
