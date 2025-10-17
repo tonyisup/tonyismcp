@@ -62,7 +62,7 @@ export default function ResumePage() {
 
         {/* Footer Info */}
         <div className="text-center text-sm text-muted-foreground">
-          <p>If the PDF doesn't load properly, try downloading it or opening in a new tab.</p>
+          <p>If the PDF doesn&apos;t load properly, try downloading it or opening in a new tab.</p>
         </div>
       </div>
     </main>

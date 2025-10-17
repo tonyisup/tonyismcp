@@ -1,26 +1,5 @@
-import { Mic, Film, Brain, Home, Star, Badge } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { BlogPosts } from "./components/BlogPosts";
 import Link from "next/link";
-
-const blogPosts = [
-  {
-    title: "Why I Built a Voice-Based Movie Rating App",
-    date: "2025-04-01",
-    excerpt: "A behind-the-scenes look at how I'm merging film critique with interaction design.",
-  },
-  {
-    title: "Making Sense of Nonverbal Communication Across Cultures",
-    date: "2025-03-18",
-    excerpt: "Exploring silent signals in human interaction and how they vary globally.",
-  },
-  {
-    title: "Solar Panels That Bend With the Sun",
-    date: "2025-02-27",
-    excerpt: "An experimental dive into compliant mechanisms and shape-memory alloys.",
-  },
-];
-
 
 export default function HomePage() {
   return (
@@ -52,7 +31,7 @@ export default function HomePage() {
                   </h3>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">Co-hosting and engineering a weekly podcast about movies and pop culture. Been going for over ten years! "Yeah, we're terrible. Please come." </p>
+                  <p className="text-sm text-muted-foreground">Co-hosting and engineering a weekly podcast about movies and pop culture. Been going for over ten years! &quot;Yeah, we&apos;re terrible. Please come.&quot; </p>
                 </CardContent>
               </Card>
               <Card>
