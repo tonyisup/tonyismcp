@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Download, ExternalLink } from "lucide-react";
+import { ArrowLeft, Book, Download, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -11,12 +11,17 @@ export default function ResumePage() {
         <div className="flex items-center justify-between">
           <div className="w-full flex items-center gap-4">
             <Link href="/">
-              <Button variant="outline" size="sm" className="flex items-center gap-2 cursor-pointer">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold">Resume</h1>
+            <Link href="/resume/certificates">
+              <Button variant="outline" size="sm">
+                <Book className="h-4 w-4" />
+                Certificates
+              </Button>
+            </Link>
             <p className="w-full text-center text-sm text-muted-foreground">Last updated: October 17, 2025</p>
           </div>
           <div className="flex gap-2">
