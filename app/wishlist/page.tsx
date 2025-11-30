@@ -56,6 +56,7 @@ function WishlistContent() {
     const wishlistParam = searchParams.get('wishlist');
     const minParam = searchParams.get('min');
     const maxParam = searchParams.get('max');
+    const hideParam = searchParams.get('hide');
 
     // Sync inputs from URL parameters
     // We intentionally do NOT include local state (url, minPrice, maxPrice) in dependencies
@@ -73,20 +74,6 @@ function WishlistContent() {
       setUrl(wishlistParam);
     }
 
-    if (minParam !== null) {
-      const val = Number(minParam);
-      if (!isNaN(val) && val !== minPrice) setMinPrice(val);
-    }
-
-    if (maxParam !== null) {
-      const val = Number(maxParam);
-      if (!isNaN(val) && val !== maxPrice) setMaxPrice(val);
-    }
-
-    if (wishlistParam && wishlistParam !== lastFetchedUrl) {
-      setLastFetchedUrl(wishlistParam);
-      loadWishlist(wishlistParam);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, lastFetchedUrl, loadWishlist]);
 
@@ -95,8 +82,9 @@ function WishlistContent() {
 
     const params = new URLSearchParams();
     if (url) params.set('wishlist', url);
-    if (minPrice !== '' && minPrice !== 0) params.set('min', minPrice.toString());
-    if (maxPrice !== '' && maxPrice !== 100) params.set('max', maxPrice.toString());
+    if (minPrice !== '') params.set('min', minPrice.toString());
+    if (maxPrice !== '') params.set('max', maxPrice.toString());
+    if (hideOutsideBudget) params.set('hide', 'true');
 
     const queryString = params.toString();
     const newPath = queryString ? `${pathname}?${queryString}` : pathname;
