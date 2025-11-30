@@ -14,6 +14,7 @@ function WishlistContent() {
   const [url, setUrl] = useState('');
   const [minPrice, setMinPrice] = useState<number | ''>(0);
   const [maxPrice, setMaxPrice] = useState<number | ''>(100);
+  const [hideOutsideBudget, setHideOutsideBudget] = useState(false);
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +28,8 @@ function WishlistContent() {
     setError(null);
 
     if (!isLoadMore) {
-        setItems([]);
-        setNextPage(null);
+      setItems([]);
+      setNextPage(null);
     }
 
     try {
@@ -38,7 +39,7 @@ function WishlistContent() {
         setNextPage(result.nextPageUrl || null);
 
         if (result.items.length === 0 && !isLoadMore) {
-            setError("No items found. This might be because the wishlist is private, or Amazon's layout has changed.");
+          setError("No items found. This might be because the wishlist is private, or Amazon's layout has changed.");
         }
       } else {
         setError(result.error || 'Failed to fetch items');
@@ -69,24 +70,24 @@ function WishlistContent() {
     // `wishlistParam !== url` check is still useful to avoid unnecessary state updates if they match.
 
     if (wishlistParam && wishlistParam !== url) {
-        setUrl(wishlistParam);
+      setUrl(wishlistParam);
     }
 
     if (minParam !== null) {
-        const val = Number(minParam);
-        if (!isNaN(val) && val !== minPrice) setMinPrice(val);
+      const val = Number(minParam);
+      if (!isNaN(val) && val !== minPrice) setMinPrice(val);
     }
 
     if (maxParam !== null) {
-        const val = Number(maxParam);
-        if (!isNaN(val) && val !== maxPrice) setMaxPrice(val);
+      const val = Number(maxParam);
+      if (!isNaN(val) && val !== maxPrice) setMaxPrice(val);
     }
 
     if (wishlistParam && wishlistParam !== lastFetchedUrl) {
-        setLastFetchedUrl(wishlistParam);
-        loadWishlist(wishlistParam);
+      setLastFetchedUrl(wishlistParam);
+      loadWishlist(wishlistParam);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, lastFetchedUrl, loadWishlist]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -103,10 +104,10 @@ function WishlistContent() {
     router.push(newPath);
 
     if (url && url === lastFetchedUrl) {
-        loadWishlist(url);
+      loadWishlist(url);
     } else if (url && url !== lastFetchedUrl) {
-        loadWishlist(url);
-        setLastFetchedUrl(url);
+      loadWishlist(url);
+      setLastFetchedUrl(url);
     }
   };
 
@@ -114,8 +115,8 @@ function WishlistContent() {
     <main className="min-h-screen bg-background p-8 text-foreground">
       <div className="max-w-5xl mx-auto space-y-8">
         <header className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Amazon Wishlist Blocker</h1>
-            <Link href="/" className="text-sm underline">Back to Home</Link>
+          <h1 className="text-3xl font-bold">Amazon Wishlist Blocker</h1>
+          <Link href="/" className="text-sm underline">Back to Home</Link>
         </header>
 
         <p className="text-muted-foreground">
@@ -164,6 +165,19 @@ function WishlistContent() {
               </div>
             </div>
 
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="hideOutsideBudget"
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                checked={hideOutsideBudget}
+                onChange={(e) => setHideOutsideBudget(e.target.checked)}
+              />
+              <label htmlFor="hideOutsideBudget" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Hide items outside budget
+              </label>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -187,22 +201,24 @@ function WishlistContent() {
             const max = maxPrice === '' ? Infinity : maxPrice;
             const isBlurred = price < min || price > max;
 
+            if (hideOutsideBudget && isBlurred) return null;
+
             return (
               <Card key={item.id} className="overflow-hidden relative group">
                 <div className={`transition-all duration-300 ${isBlurred ? 'blur-md opacity-50 grayscale hover:blur-none hover:opacity-100 hover:grayscale-0' : ''}`}>
                   <div className="aspect-square relative bg-gray-100 flex items-center justify-center overflow-hidden">
-                     {item.imageUrl ? (
-                         /* eslint-disable-next-line @next/next/no-img-element */
-                         <img src={item.imageUrl} alt={item.title} className="object-contain w-full h-full" />
-                     ) : (
-                         <span className="text-gray-400">No Image</span>
-                     )}
+                    {item.imageUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={item.imageUrl} alt={item.title} className="object-contain w-full h-full" />
+                    ) : (
+                      <span className="text-gray-400">No Image</span>
+                    )}
                   </div>
                   <CardContent className="p-4">
                     <h3 className="font-semibold text-lg line-clamp-2 h-14 mb-2">
-                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                            {item.title}
-                        </a>
+                      <a href={item.link} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        {item.title}
+                      </a>
                     </h3>
                     <p className="text-xl font-bold text-green-600">
                       {item.priceString || 'Price not available'}
@@ -211,11 +227,11 @@ function WishlistContent() {
                 </div>
 
                 {isBlurred && (
-                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                       <span className="bg-black/70 text-white px-3 py-1 rounded text-sm font-bold">
-                           Outside Budget
-                       </span>
-                   </div>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="bg-black/70 text-white px-3 py-1 rounded text-sm font-bold">
+                      Outside Budget
+                    </span>
+                  </div>
                 )}
               </Card>
             );
@@ -223,15 +239,15 @@ function WishlistContent() {
         </div>
 
         {nextPage && (
-            <div className="flex justify-center pt-4">
-                <button
-                    onClick={() => loadWishlist(nextPage, true)}
-                    disabled={loading}
-                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-8 py-2"
-                >
-                    {loading ? 'Loading...' : 'Load More'}
-                </button>
-            </div>
+          <div className="flex justify-center pt-4">
+            <button
+              onClick={() => loadWishlist(nextPage, true)}
+              disabled={loading}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-8 py-2"
+            >
+              {loading ? 'Loading...' : 'Load More'}
+            </button>
+          </div>
         )}
       </div>
     </main>
@@ -239,9 +255,9 @@ function WishlistContent() {
 }
 
 export default function WishlistPage() {
-    return (
-        <Suspense fallback={<div className="min-h-screen bg-background p-8 flex items-center justify-center">Loading...</div>}>
-            <WishlistContent />
-        </Suspense>
-    );
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background p-8 flex items-center justify-center">Loading...</div>}>
+      <WishlistContent />
+    </Suspense>
+  );
 }

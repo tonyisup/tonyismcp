@@ -31,6 +31,7 @@ export async function fetchWishlist(url: string): Promise<{ success: boolean; it
     const html = await response.text();
     const $ = cheerio.load(html);
     const items: WishlistItem[] = [];
+    const seenIds = new Set<string>();
 
     // Amazon Wishlist selectors are tricky and change.
     // Typical structure: <li data-id="..."> ... </li> or <div id="g-items"> ... </div>
@@ -41,24 +42,49 @@ export async function fetchWishlist(url: string): Promise<{ success: boolean; it
 
     listItems.each((_, element) => {
       const el = $(element);
-      const id = el.attr('data-id') || el.attr('data-itemid') || `item-${Math.random()}`;
+      // console.log('element', el); 
+      // Try to find ASIN
+      const asin = el.attr('data-asin') || el.attr('data-itemid');
 
       // Title
       const title = el.find('a[id^="itemName_"]').attr('title') ||
-                  el.find('h2 a').text().trim() ||
-                  el.find('h3 a').text().trim();
+        el.find('h2 a').text().trim() ||
+        el.find('h3 a').text().trim();
 
       // Image
       const imageUrl = el.find('img').attr('src') || '';
 
       // Link
       let link = el.find('a[id^="itemName_"]').attr('href') ||
-                 el.find('h2 a').attr('href') ||
-                 '';
+        el.find('h2 a').attr('href') ||
+        '';
 
       if (link && !link.startsWith('http')) {
         link = 'https://www.amazon.com' + link;
       }
+
+      // Generate a unique ID
+      let id = asin;
+      if (!id) {
+        // Try to extract ASIN from link
+        const asinMatch = link.match(/\/dp\/([A-Z0-9]{10})/);
+        if (asinMatch) {
+          id = asinMatch[1];
+        }
+      }
+
+      // Fallback ID if no ASIN found: use title + part of link to ensure uniqueness
+      if (!id) {
+        if (title) {
+          id = `${title.substring(0, 20)}-${link.substring(link.length - 10)}`;
+        } else {
+          id = `item-${Math.random().toString(36).substr(2, 9)}`;
+        }
+      }
+
+      // Deduplicate
+      if (seenIds.has(id)) return;
+      seenIds.add(id);
 
       // Price
       // Price can be in multiple places depending on view (list vs grid)
