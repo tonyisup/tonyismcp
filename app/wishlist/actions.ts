@@ -11,7 +11,7 @@ export interface WishlistItem {
   link: string;
 }
 
-export async function fetchWishlist(url: string): Promise<{ success: boolean; items: WishlistItem[]; error?: string }> {
+export async function fetchWishlist(url: string): Promise<{ success: boolean; items: WishlistItem[]; nextPageUrl?: string; error?: string }> {
   try {
     if (!url.includes('amazon.com')) {
       return { success: false, items: [], error: 'Please provide a valid Amazon.com wishlist URL.' };
@@ -91,7 +91,14 @@ export async function fetchWishlist(url: string): Promise<{ success: boolean; it
       }
     });
 
-    return { success: true, items };
+    // Pagination
+    let nextPageUrl: string | undefined;
+    const nextLink = $('.a-pagination .a-last a').attr('href');
+    if (nextLink) {
+      nextPageUrl = nextLink.startsWith('http') ? nextLink : 'https://www.amazon.com' + nextLink;
+    }
+
+    return { success: true, items, nextPageUrl };
 
   } catch (error) {
     console.error('Error fetching wishlist:', error);
