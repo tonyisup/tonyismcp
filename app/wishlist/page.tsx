@@ -18,19 +18,26 @@ function WishlistContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFetchedUrl, setLastFetchedUrl] = useState('');
+  const [nextPage, setNextPage] = useState<string | null>(null);
 
-  const loadWishlist = useCallback(async (wishlistUrl: string) => {
+  const loadWishlist = useCallback(async (wishlistUrl: string, isLoadMore = false) => {
     if (!wishlistUrl) return;
 
     setLoading(true);
     setError(null);
-    setItems([]);
+
+    if (!isLoadMore) {
+        setItems([]);
+        setNextPage(null);
+    }
 
     try {
       const result = await fetchWishlist(wishlistUrl);
       if (result.success) {
-        setItems(result.items);
-        if (result.items.length === 0) {
+        setItems(prev => isLoadMore ? [...prev, ...result.items] : result.items);
+        setNextPage(result.nextPageUrl || null);
+
+        if (result.items.length === 0 && !isLoadMore) {
             setError("No items found. This might be because the wishlist is private, or Amazon's layout has changed.");
         }
       } else {
@@ -214,6 +221,18 @@ function WishlistContent() {
             );
           })}
         </div>
+
+        {nextPage && (
+            <div className="flex justify-center pt-4">
+                <button
+                    onClick={() => loadWishlist(nextPage, true)}
+                    disabled={loading}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-8 py-2"
+                >
+                    {loading ? 'Loading...' : 'Load More'}
+                </button>
+            </div>
+        )}
       </div>
     </main>
   );
