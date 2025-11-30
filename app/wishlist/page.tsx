@@ -1,26 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { fetchWishlist, WishlistItem } from './actions';
 import { Card, CardContent } from "@/components/ui/card";
 import Link from 'next/link';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
-export default function WishlistPage() {
+function WishlistContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [url, setUrl] = useState('');
   const [minPrice, setMinPrice] = useState<number | ''>(0);
   const [maxPrice, setMaxPrice] = useState<number | ''>(100);
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastFetchedUrl, setLastFetchedUrl] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const loadWishlist = useCallback(async (wishlistUrl: string) => {
+    if (!wishlistUrl) return;
+
     setLoading(true);
     setError(null);
     setItems([]);
 
     try {
-      const result = await fetchWishlist(url);
+      const result = await fetchWishlist(wishlistUrl);
       if (result.success) {
         setItems(result.items);
         if (result.items.length === 0) {
@@ -34,6 +41,65 @@ export default function WishlistPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const wishlistParam = searchParams.get('wishlist');
+    const minParam = searchParams.get('min');
+    const maxParam = searchParams.get('max');
+
+    // Sync inputs from URL parameters
+    // We intentionally do NOT include local state (url, minPrice, maxPrice) in dependencies
+    // to allow user editing without the effect reverting changes.
+    // The effect should only run when searchParams change (navigation).
+
+    // However, if we only check `searchParams` and update state,
+    // we might overwrite user input if the user is typing and something else causes searchParams to update?
+    // In this simple app, searchParams only update on navigation/submit.
+    // So this is safe.
+    // But we should be careful: if we navigate, we want to update state.
+    // `wishlistParam !== url` check is still useful to avoid unnecessary state updates if they match.
+
+    if (wishlistParam && wishlistParam !== url) {
+        setUrl(wishlistParam);
+    }
+
+    if (minParam !== null) {
+        const val = Number(minParam);
+        if (!isNaN(val) && val !== minPrice) setMinPrice(val);
+    }
+
+    if (maxParam !== null) {
+        const val = Number(maxParam);
+        if (!isNaN(val) && val !== maxPrice) setMaxPrice(val);
+    }
+
+    if (wishlistParam && wishlistParam !== lastFetchedUrl) {
+        setLastFetchedUrl(wishlistParam);
+        loadWishlist(wishlistParam);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, lastFetchedUrl, loadWishlist]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const params = new URLSearchParams();
+    if (url) params.set('wishlist', url);
+    if (minPrice !== '' && minPrice !== 0) params.set('min', minPrice.toString());
+    if (maxPrice !== '' && maxPrice !== 100) params.set('max', maxPrice.toString());
+
+    const queryString = params.toString();
+    const newPath = queryString ? `${pathname}?${queryString}` : pathname;
+
+    router.push(newPath);
+
+    if (url && url === lastFetchedUrl) {
+        loadWishlist(url);
+    } else if (url && url !== lastFetchedUrl) {
+        loadWishlist(url);
+        setLastFetchedUrl(url);
     }
   };
 
@@ -151,4 +217,12 @@ export default function WishlistPage() {
       </div>
     </main>
   );
+}
+
+export default function WishlistPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-background p-8 flex items-center justify-center">Loading...</div>}>
+            <WishlistContent />
+        </Suspense>
+    );
 }
