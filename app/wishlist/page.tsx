@@ -54,9 +54,9 @@ function WishlistContent() {
 
   useEffect(() => {
     const wishlistParam = searchParams.get('wishlist');
-    const minParam = searchParams.get('min');
-    const maxParam = searchParams.get('max');
-    const hideParam = searchParams.get('hide');
+    // const minParam = searchParams.get('min');
+    // const maxParam = searchParams.get('max');
+    // const hideParam = searchParams.get('hide');
 
     // Sync inputs from URL parameters
     // We intentionally do NOT include local state (url, minPrice, maxPrice) in dependencies
