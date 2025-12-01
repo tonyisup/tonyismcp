@@ -27,7 +27,7 @@ export default function HomePage() {
               <Card>
                 <CardHeader>
                   <h3 className="text-xl font-bold">
-                    <Link href="https://badboyspodcast.com" target="_blank">Bad Boys Podcast</Link>
+                    <Link href="/showcase/bad-boys-podcast">Bad Boys Podcast</Link>
                   </h3>
                 </CardHeader>
                 <CardContent>
