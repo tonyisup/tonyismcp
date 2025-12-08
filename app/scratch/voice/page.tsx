@@ -232,11 +232,10 @@ export default function VoicePrototype() {
           </div>
           <button
             onClick={toggleListening}
-            className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${
-              isListening
+            className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${isListening
                 ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 ring-1 ring-red-500/50'
                 : 'bg-emerald-500 text-neutral-950 hover:bg-emerald-400'
-            }`}
+              }`}
           >
             {isListening ? <><MicOff size={20} /> Stop Listening</> : <><Mic size={20} /> Start Listening</>}
           </button>
@@ -261,9 +260,8 @@ export default function VoicePrototype() {
               {/* Mode */}
               <div className="flex items-center justify-between">
                 <span className="text-neutral-400">Current Mode</span>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  appState.mode === 'Paint' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
-                }`}>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${appState.mode === 'Paint' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
+                  }`}>
                   {appState.mode}
                 </span>
               </div>
@@ -318,7 +316,7 @@ export default function VoicePrototype() {
 
           {/* Debug Console */}
           <div className="space-y-6">
-             <h2 className="text-xl font-semibold flex items-center gap-2 text-neutral-300">
+            <h2 className="text-xl font-semibold flex items-center gap-2 text-neutral-300">
               <Terminal size={20} /> Recognition Log
             </h2>
 
@@ -357,10 +355,10 @@ export default function VoicePrototype() {
                       <div className="flex justify-between items-start">
                         <span className="text-green-400 font-bold">{log.text}</span>
                         <span className="text-neutral-600 text-xs">
-                           {new Date(log.timestamp).toLocaleTimeString()}
+                          {new Date(log.timestamp).toLocaleTimeString()}
                         </span>
                       </div>
-                      {log.data && (
+                      {!!log.data && (
                         <div className="text-neutral-500 text-xs mt-1">
                           {JSON.stringify(log.data)}
                         </div>
