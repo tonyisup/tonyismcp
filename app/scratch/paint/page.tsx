@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useReducer, useRef, useEffect } from 'react';
+import React, { useReducer, useRef, useEffect, useState } from 'react';
 import { appReducer, initialState } from './reducer';
 import { cn } from '@/lib/utils';
-import { Eraser, Brush, Undo, Trash2, Mic, Eye, Hand } from 'lucide-react';
+import { Eraser, Brush, Undo, Trash2, Mic, Eye, Hand, Settings, Crosshair } from 'lucide-react';
 import { useHandTracking } from './components/useHandTracking';
 import { useVoiceControl } from './components/useVoiceControl';
 import { useGazeTracking } from './components/useGazeTracking';
+import { CalibrationOverlay } from './components/CalibrationOverlay';
 
 // Components (We will extract these later or keep them here if small)
 // But for now, I'll put the shell here.
@@ -15,6 +16,8 @@ export default function UnifiedPaintPage() {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isCalibrationOpen, setIsCalibrationOpen] = useState(false);
+  const [activeRegression, setActiveRegression] = useState('ridge');
 
   // Refs for State
   const stateRef = useRef(state);
@@ -27,7 +30,14 @@ export default function UnifiedPaintPage() {
   const { isListening: isVoiceListening, lastTranscript } = useVoiceControl(dispatch);
 
   // --- Gaze Tracking Hook ---
-  const { isGazeReady, gazePos, focusedId, dwellProgress } = useGazeTracking(stateRef, dispatch);
+  const {
+    isGazeReady,
+    gazePos,
+    focusedId,
+    dwellProgress,
+    setRegressionModel,
+    clearCalibrationData
+  } = useGazeTracking(stateRef, dispatch);
 
   const isReady = isHandDetected || isGazeReady; // Simplified readiness check
 
@@ -48,6 +58,11 @@ export default function UnifiedPaintPage() {
     }
   }, [state.isClearTriggered, state.isUndoTriggered]);
 
+  const handleRegressionChange = (model: string) => {
+    setActiveRegression(model);
+    setRegressionModel(model);
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col font-sans relative overflow-hidden">
       {/* Shared Video Element (Hidden or Small Preview) */}
@@ -58,6 +73,14 @@ export default function UnifiedPaintPage() {
         muted
         autoPlay // Ensure it plays
       />
+
+      {/* Calibration Overlay */}
+      {isCalibrationOpen && (
+        <CalibrationOverlay
+            onComplete={() => setIsCalibrationOpen(false)}
+            onCancel={() => setIsCalibrationOpen(false)}
+        />
+      )}
 
       {/* Header / Status Bar */}
       <header className="bg-white border-b border-gray-200 p-4 shadow-sm z-20 flex justify-between items-center">
@@ -72,6 +95,18 @@ export default function UnifiedPaintPage() {
         </div>
 
         <div className="flex items-center gap-4 text-sm text-gray-500">
+            {isGazeReady && (
+                <button
+                    onClick={() => setIsCalibrationOpen(true)}
+                    className="flex items-center gap-2 px-3 py-1 bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition-colors"
+                >
+                    <Crosshair className="w-4 h-4" />
+                    Calibrate Gaze
+                </button>
+            )}
+
+            <div className="h-4 w-px bg-gray-300 mx-2" />
+
             <div className={cn("flex items-center gap-1 transition-colors", isVoiceListening ? "text-green-600 font-bold" : "")}><Mic className="w-4 h-4" /> Voice</div>
             <div className={cn("flex items-center gap-1 transition-colors", isGazeReady ? "text-green-600 font-bold" : "")}><Eye className="w-4 h-4" /> Gaze</div>
             <div className={cn("flex items-center gap-1 transition-colors", isHandDetected ? "text-green-600 font-bold" : "")}><Hand className="w-4 h-4" /> Gesture</div>
@@ -219,8 +254,11 @@ export default function UnifiedPaintPage() {
       </main>
 
       {/* Debug Overlay */}
-      <div className="fixed bottom-4 right-4 bg-black/80 text-white p-4 rounded-lg text-xs font-mono w-80 pointer-events-none z-50">
-        <div className="font-bold border-b border-gray-600 pb-2 mb-2">State Monitor</div>
+      <div className="fixed bottom-4 right-4 bg-black/80 text-white p-4 rounded-lg text-xs font-mono w-80 pointer-events-auto z-50">
+        <div className="font-bold border-b border-gray-600 pb-2 mb-2 flex justify-between items-center">
+            <span>State Monitor</span>
+            <Settings className="w-4 h-4 text-gray-400" />
+        </div>
         <div className="grid grid-cols-2 gap-2">
             <div>Mode: <span className="text-yellow-400">{state.mode}</span></div>
             <div>Tool: {state.activeTool}</div>
@@ -240,6 +278,33 @@ export default function UnifiedPaintPage() {
             </div>
             <div className="col-span-2 text-gray-400 mt-1">
                 Gaze: {gazePos ? `${Math.round(gazePos.x)}, ${Math.round(gazePos.y)}` : "None"} (Focus: {focusedId})
+            </div>
+
+            {/* Regression Settings */}
+            <div className="col-span-2 border-t border-gray-700 mt-2 pt-2">
+                <div className="mb-1 text-gray-400">Gaze Regression Model:</div>
+                <div className="flex gap-1">
+                    {['ridge', 'weightedRidge', 'threadedRidge'].map((model) => (
+                        <button
+                            key={model}
+                            onClick={() => handleRegressionChange(model)}
+                            className={cn(
+                                "px-2 py-1 rounded text-[10px] border",
+                                activeRegression === model
+                                    ? "bg-blue-600 border-blue-400 text-white"
+                                    : "bg-gray-800 border-gray-600 text-gray-400 hover:bg-gray-700"
+                            )}
+                        >
+                            {model}
+                        </button>
+                    ))}
+                </div>
+                <button
+                    onClick={clearCalibrationData}
+                    className="mt-2 text-[10px] text-red-400 hover:text-red-300 underline"
+                >
+                    Clear Calibration Data
+                </button>
             </div>
         </div>
       </div>

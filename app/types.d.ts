@@ -15,6 +15,8 @@ declare global {
     showPredictionPoints: (show: boolean) => WebGazer;
     pause: () => void;
     resume: () => void;
+    setRegression: (modelName: string) => WebGazer;
+    clearData: () => Promise<void> | void;
   }
 
   interface Window {
