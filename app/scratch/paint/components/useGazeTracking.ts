@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppState, Action } from '../types';
 
-
-
 const DWELL_THRESHOLD_MS = 800;
 const FLICKER_TOLERANCE_MS = 200;
 
@@ -119,6 +117,36 @@ export function useGazeTracking(
         updateDwell(targetId);
     }, [updateDwell]);
 
+    // Calibration and Configuration Methods
+    const setRegressionModel = useCallback((modelName: string) => {
+        if (typeof window !== 'undefined' && window.webgazer) {
+            try {
+                window.webgazer.setRegression(modelName);
+                console.log(`WebGazer regression set to: ${modelName}`);
+            } catch (e) {
+                console.error("Failed to set regression model:", e);
+            }
+        }
+    }, []);
+
+    const clearCalibrationData = useCallback(() => {
+        if (typeof window !== 'undefined' && window.webgazer) {
+            // WebGazer stores data in localforage usually.
+            // webgazer.clearData() helps but sometimes a full reset is needed.
+            // For now, let's assume webgazer.clearData() exists or we just rely on new clicks.
+            // Actually, WebGazer documentation says 'webgazer.clearData()' clears the regression data.
+            try {
+                // Check if the function exists
+                if (typeof window.webgazer.clearData === 'function') {
+                    window.webgazer.clearData();
+                } else {
+                    console.warn("webgazer.clearData() not found");
+                }
+            } catch (e) {
+                console.error("Failed to clear data:", e);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         // Load WebGazer
@@ -132,36 +160,7 @@ export function useGazeTracking(
                     if (data) handleGazeUpdate(data.x, data.y);
                 });
 
-                // IMPORTANT: Coordinate video element
-                // WebGazer by default creates its own video or uses one.
-                // If we want to share, we might need to tell WebGazer to use our videoID?
-                // Unfortuntely WebGazer API for "attach to existing video element" is tricky.
-                // Often it's easier to let WebGazer create the video and then we grab it for MediaPipe?
-                // OR we accept two video elements for now to be safe, as "Sharing" one element between two different libraries
-                // (one likely resizing/reformatting it) is a recipe for conflict without a custom "Multiplexer".
-
-                // Per instructions: "If WebGazer and MediaPipe have conflicting expectations... multiplexer... perfectly fine."
-                // "If needed... prioritize smooth gesture painting."
-
-                // Strategy: Let WebGazer run. It will access camera.
-                // MediaPipe *also* accesses camera via `navigator.mediaDevices.getUserMedia`.
-                // Can two streams run at once? Yes, usually.
-                // However, to strictly follow "Sharing one video feed is strongly preferred":
-                // We need to see if WebGazer can accept a stream or video element.
-                // Looking at WebGazer docs (memory): webgazer.setVideoElementCanvas(videoElement) might exist?
-                // Or we just let WebGazer handle the camera, and we pass `webgazer.getVideoElement()` to MediaPipe?
-
-                // Let's try: WebGazer starts -> We grab its video element -> We pass to MediaPipe?
-                // That would ensure 1 camera stream.
-
-                // But for now, let's try the simple path: Two streams.
-                // If that fails (permission error), we'll try to hijack one.
-                // Actually, `useHandTracking` is already getting a stream.
-
-                // Let's TRY to just run both. If it fails, I'll update the plan.
-                // WebGazer puts its video in the DOM.
-
-                webgazer.showVideoPreview(false); // We hide it, we have our own or we don't need it.
+                webgazer.showVideoPreview(false);
                 webgazer.showPredictionPoints(false);
                 webgazer.begin();
                 setIsGazeReady(true);
@@ -177,5 +176,12 @@ export function useGazeTracking(
         }
     }, [handleGazeUpdate]);
 
-    return { isGazeReady, gazePos, focusedId, dwellProgress };
+    return {
+        isGazeReady,
+        gazePos,
+        focusedId,
+        dwellProgress,
+        setRegressionModel,
+        clearCalibrationData
+    };
 }
