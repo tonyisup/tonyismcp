@@ -53,35 +53,13 @@ export default function ImaginePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-       {/* Navbar - mimicking the screenshot's top bar roughly for context */}
-       <header className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <Button variant="ghost" size="icon">
-            <Home className="h-6 w-6" />
-          </Button>
-
-          <div className="flex-1 max-w-xl mx-4 relative">
-             <div className="w-full bg-muted rounded-full px-4 py-2 text-sm text-muted-foreground truncate">
-                tonyisup.com/imagine
-             </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon">
-              <Plus className="h-6 w-6" />
-            </Button>
-            <div className="w-8 h-8 rounded border border-border flex items-center justify-center text-xs font-bold">
-               28
-            </div>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </div>
-       </header>
+      <header className="flex items-center justify-center px-4 py-3 border-b border-border">
+        <h1 className="text-2xl font-bold">Imagine</h1>
+      </header>
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 gap-8">
 
         <div className="flex flex-col items-center gap-4">
-          <h1 className="text-2xl font-bold">Imagine</h1>
           <Button
             onClick={handleRepaintBoth}
             disabled={isGenerating}
