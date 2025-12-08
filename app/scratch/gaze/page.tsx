@@ -10,24 +10,7 @@ const FLICKER_TOLERANCE_MS = 150;
 
 type Tool = 'brush' | 'eraser' | 'red' | 'blue' | 'undo';
 
-interface WebGazerData {
-  x: number;
-  y: number;
-}
 
-interface WebGazer {
-  setGazeListener: (listener: (data: WebGazerData | null, elapsedTime: number) => void) => WebGazer;
-  begin: () => void;
-  end: () => void;
-  showVideoPreview: (show: boolean) => WebGazer;
-  showPredictionPoints: (show: boolean) => WebGazer;
-}
-
-declare global {
-  interface Window {
-    webgazer: WebGazer;
-  }
-}
 
 export default function GazePage() {
   const [gazePos, setGazePos] = useState<{ x: number; y: number } | null>(null);
@@ -87,14 +70,14 @@ export default function GazePage() {
         // But we don't update lastSeenTime because we aren't seeing it.
         // We just continue the dwell.
         if (!state.isSelected) {
-           const elapsed = now - state.startTime;
-           const progress = Math.min(elapsed / DWELL_THRESHOLD_MS, 1);
-           setDwellProgress(progress);
+          const elapsed = now - state.startTime;
+          const progress = Math.min(elapsed / DWELL_THRESHOLD_MS, 1);
+          setDwellProgress(progress);
 
-            if (elapsed >= DWELL_THRESHOLD_MS) {
-                triggerSelection(state.activeTarget);
-                state.isSelected = true;
-            }
+          if (elapsed >= DWELL_THRESHOLD_MS) {
+            triggerSelection(state.activeTarget);
+            state.isSelected = true;
+          }
         }
       } else {
         // Tolerance exceeded or switched to a new real target
@@ -148,10 +131,10 @@ export default function GazePage() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-        // Check if window is defined (it should be in client component but safer)
-        if (typeof window !== 'undefined' && window.webgazer) {
-            window.webgazer.end();
-        }
+      // Check if window is defined (it should be in client component but safer)
+      if (typeof window !== 'undefined' && window.webgazer) {
+        window.webgazer.end();
+      }
     };
   }, []);
 
@@ -168,8 +151,8 @@ export default function GazePage() {
       {/* Canvas Area */}
       <div
         className={cn(
-            "w-[800px] h-[400px] bg-white border-2 rounded-xl shadow-sm mb-8 relative transition-colors duration-300",
-            focusedId === 'canvas' ? "border-blue-500 shadow-lg" : "border-gray-200"
+          "w-[800px] h-[400px] bg-white border-2 rounded-xl shadow-sm mb-8 relative transition-colors duration-300",
+          focusedId === 'canvas' ? "border-blue-500 shadow-lg" : "border-gray-200"
         )}
         data-gaze-target
         data-id="canvas"
@@ -192,28 +175,28 @@ export default function GazePage() {
               focusedId === tool && "scale-105"
             )}
           >
-             {/* Dwell Progress Indicator (Border or Background fill) */}
-             {focusedId === tool && !stateRef.current.isSelected && (
-                <div
-                    className="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-75 ease-linear"
-                    style={{ width: `${dwellProgress * 100}%` }}
+            {/* Dwell Progress Indicator (Border or Background fill) */}
+            {focusedId === tool && !stateRef.current.isSelected && (
+              <div
+                className="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-75 ease-linear"
+                style={{ width: `${dwellProgress * 100}%` }}
+              />
+            )}
+
+            {/* Circular progress overlay */}
+            {focusedId === tool && !stateRef.current.isSelected && (
+              <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
+                <rect
+                  width="100%"
+                  height="100%"
+                  fill={selectedTool === tool ? "blue" : "gray"}
+                  className="origin-bottom transform transition-transform duration-75 ease-linear"
+                  style={{ transform: `scaleY(${dwellProgress})` }}
                 />
-             )}
+              </svg>
+            )}
 
-             {/* Circular progress overlay */}
-              {focusedId === tool && !stateRef.current.isSelected && (
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
-                      <rect
-                        width="100%"
-                        height="100%"
-                        fill={selectedTool === tool ? "blue" : "gray"}
-                        className="origin-bottom transform transition-transform duration-75 ease-linear"
-                        style={{ transform: `scaleY(${dwellProgress})` }}
-                       />
-                  </svg>
-              )}
-
-             <span className="z-10 capitalize">{tool}</span>
+            <span className="z-10 capitalize">{tool}</span>
           </button>
         ))}
       </div>
@@ -221,8 +204,8 @@ export default function GazePage() {
       {/* Gaze Cursor */}
       {gazePos && (
         <div
-            className="fixed w-6 h-6 rounded-full border-2 border-red-500 bg-red-500/30 pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75 ease-out"
-            style={{ left: gazePos.x, top: gazePos.y }}
+          className="fixed w-6 h-6 rounded-full border-2 border-red-500 bg-red-500/30 pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75 ease-out"
+          style={{ left: gazePos.x, top: gazePos.y }}
         />
       )}
 
@@ -234,15 +217,15 @@ export default function GazePage() {
         <div>Selected: {selectedTool || 'None'}</div>
         <div>Gaze: {gazePos ? `${Math.round(gazePos.x)}, ${Math.round(gazePos.y)}` : 'N/A'}</div>
         <div className="mt-2 border-t border-gray-600 pt-1 text-gray-400">
-            {debugLog.map((log, i) => (
-                <div key={i}>{log}</div>
-            ))}
+          {debugLog.map((log, i) => (
+            <div key={i}>{log}</div>
+          ))}
         </div>
       </div>
 
       {!isWebGazerReady && (
         <div className="fixed inset-0 bg-white/80 z-[60] flex items-center justify-center">
-            <div className="text-xl">Loading WebGazer...</div>
+          <div className="text-xl">Loading WebGazer...</div>
         </div>
       )}
     </div>
