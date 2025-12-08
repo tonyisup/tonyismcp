@@ -1,20 +1,249 @@
 'use client';
 
-import { useRef } from 'react';
+import React, { useReducer, useRef, useEffect } from 'react';
+import { appReducer, initialState } from './reducer';
+import { cn } from '@/lib/utils';
+import { Eraser, Brush, Undo, Trash2, Mic, Eye, Hand } from 'lucide-react';
+import { useHandTracking } from './components/useHandTracking';
+import { useVoiceControl } from './components/useVoiceControl';
+import { useGazeTracking } from './components/useGazeTracking';
 
-export default function ImaginePage() {
+// Components (We will extract these later or keep them here if small)
+// But for now, I'll put the shell here.
+
+export default function UnifiedPaintPage() {
+  const [state, dispatch] = useReducer(appReducer, initialState);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Refs for State
+  const stateRef = useRef(state);
+  useEffect(() => { stateRef.current = state; }, [state]);
+
+  // --- Hand Tracking Hook ---
+  const { isHandDetected, fingertipCoords } = useHandTracking(videoRef, canvasRef, stateRef);
+
+  // --- Voice Control Hook ---
+  const { isListening: isVoiceListening, lastTranscript } = useVoiceControl(dispatch);
+
+  // --- Gaze Tracking Hook ---
+  const { isGazeReady, gazePos, focusedId, dwellProgress } = useGazeTracking(stateRef, dispatch);
+
+  const isReady = isHandDetected || isGazeReady; // Simplified readiness check
+
+  // Handle External Triggers (Clear/Undo)
+  useEffect(() => {
+    if (state.isClearTriggered && canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        dispatch({ type: 'RESET_TRIGGERS' });
+    }
+    // Undo is harder with canvas without a history stack.
+    // For prototype, we might skip actual undo implementation or just log it,
+    // unless we build a history buffer. Let's stick to Clear for now or simple "Flash" feedback.
+    if (state.isUndoTriggered) {
+        // Placeholder: Flash red or something
+        console.log("Undo triggered - (Not implemented for canvas bitmap yet)");
+        dispatch({ type: 'RESET_TRIGGERS' });
+    }
+  }, [state.isClearTriggered, state.isUndoTriggered]);
+
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <main className="flex-1 flex flex-col items-center justify-center p-4 gap-8">
-        <canvas
-          ref={canvasRef}
-          width={512}
-          height={512}
-          className="w-full h-auto aspect-square rounded-md border border-border bg-muted"
-        />
+    <div className="min-h-screen bg-neutral-50 flex flex-col font-sans relative overflow-hidden">
+      {/* Shared Video Element (Hidden or Small Preview) */}
+      <video
+        ref={videoRef}
+        className="fixed bottom-4 left-4 w-48 h-auto rounded-lg border-2 border-white shadow-lg z-50 scale-x-[-1] opacity-50 hover:opacity-100 transition-opacity"
+        playsInline
+        muted
+        autoPlay // Ensure it plays
+      />
+
+      {/* Header / Status Bar */}
+      <header className="bg-white border-b border-gray-200 p-4 shadow-sm z-20 flex justify-between items-center">
+        <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold text-gray-800">Unified Paint</h1>
+            <div className={cn(
+                "px-3 py-1 rounded-full text-sm font-medium transition-colors",
+                state.mode === 'Paint' ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
+            )}>
+                Mode: {state.mode}
+            </div>
+        </div>
+
+        <div className="flex items-center gap-4 text-sm text-gray-500">
+            <div className={cn("flex items-center gap-1 transition-colors", isVoiceListening ? "text-green-600 font-bold" : "")}><Mic className="w-4 h-4" /> Voice</div>
+            <div className={cn("flex items-center gap-1 transition-colors", isGazeReady ? "text-green-600 font-bold" : "")}><Eye className="w-4 h-4" /> Gaze</div>
+            <div className={cn("flex items-center gap-1 transition-colors", isHandDetected ? "text-green-600 font-bold" : "")}><Hand className="w-4 h-4" /> Gesture</div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 relative flex items-center justify-center p-8">
+
+        {/* Loading Overlay */}
+        {!isReady && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-gray-500 font-medium">Initializing Vision Models...</p>
+                    <div className="text-xs text-gray-400">
+                        {!isGazeReady && <div>Waiting for Gaze...</div>}
+                        {!isHandDetected && <div>Waiting for Hand...</div>}
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Gaze Cursor */}
+        {gazePos && (
+            <div
+                className="fixed w-6 h-6 rounded-full border-2 border-red-500 bg-red-500/30 pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75 ease-out"
+                style={{ left: gazePos.x, top: gazePos.y }}
+            />
+        )}
+
+        {/* Toolbar (Visual Only for now, interactive via intents) */}
+        <div
+            className={cn(
+                "absolute left-8 top-1/2 -translate-y-1/2 flex flex-col gap-4 p-4 bg-white rounded-xl shadow-xl transition-all duration-300 z-30",
+                state.mode === 'ToolSelect' ? "scale-100 opacity-100 translate-x-0" : "scale-90 opacity-80 -translate-x-4 grayscale",
+                focusedId === 'toolbar-area' ? "ring-2 ring-blue-400 shadow-2xl scale-105" : ""
+            )}
+            data-toolbar-container="true"
+        >
+             {/* Colors */}
+             {['black', 'red', 'blue', 'green', 'yellow'].map((color) => (
+                <div
+                    key={color}
+                    className={cn(
+                        "relative w-10 h-10 rounded-full border-2 transition-all cursor-pointer overflow-hidden",
+                        state.activeColor === color ? "border-gray-900 scale-110" : "border-transparent",
+                        focusedId === `color-${color}` ? "scale-125 shadow-lg" : ""
+                    )}
+                    style={{ backgroundColor: color }}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    onClick={() => dispatch({ type: 'SELECT_COLOR', payload: color as any, source: 'mouse' })}
+                    data-tool-id={`color-${color}`}
+                >
+                    {/* Dwell Progress Overlay */}
+                    {focusedId === `color-${color}` && (
+                        <div
+                            className="absolute inset-0 bg-white/50 origin-bottom transition-transform duration-75 ease-linear"
+                            style={{ transform: `scaleY(${dwellProgress})` }}
+                        />
+                    )}
+                </div>
+             ))}
+
+             <div className="h-px w-full bg-gray-200 my-2" />
+
+             {/* Tools */}
+             <button
+                className={cn(
+                    "relative p-2 rounded-lg transition-all overflow-hidden",
+                    state.activeTool === 'brush' ? "bg-blue-100 text-blue-900" : "hover:bg-gray-100",
+                    focusedId === 'tool-brush' ? "ring-2 ring-blue-400 bg-blue-50" : ""
+                )}
+                onClick={() => dispatch({ type: 'SELECT_TOOL', payload: 'brush', source: 'mouse' })}
+                data-tool-id="tool-brush"
+             >
+                <Brush className="w-6 h-6" />
+                {focusedId === 'tool-brush' && (
+                    <div className="absolute inset-0 bg-blue-500/20 origin-left transition-transform duration-75 ease-linear" style={{ transform: `scaleX(${dwellProgress})` }} />
+                )}
+             </button>
+             <button
+                className={cn(
+                    "relative p-2 rounded-lg transition-all overflow-hidden",
+                    state.activeTool === 'eraser' ? "bg-blue-100 text-blue-900" : "hover:bg-gray-100",
+                    focusedId === 'tool-eraser' ? "ring-2 ring-blue-400 bg-blue-50" : ""
+                )}
+                 onClick={() => dispatch({ type: 'SELECT_TOOL', payload: 'eraser', source: 'mouse' })}
+                 data-tool-id="tool-eraser"
+             >
+                <Eraser className="w-6 h-6" />
+                {focusedId === 'tool-eraser' && (
+                    <div className="absolute inset-0 bg-blue-500/20 origin-left transition-transform duration-75 ease-linear" style={{ transform: `scaleX(${dwellProgress})` }} />
+                )}
+             </button>
+
+             <div className="h-px w-full bg-gray-200 my-2" />
+
+             <button
+                className={cn(
+                    "relative p-2 rounded-lg hover:bg-gray-100 text-gray-600 overflow-hidden",
+                    focusedId === 'action-undo' ? "ring-2 ring-gray-400 bg-gray-100" : ""
+                )}
+                onClick={() => dispatch({ type: 'UNDO', source: 'mouse' })}
+                data-tool-id="action-undo"
+             >
+                <Undo className="w-6 h-6" />
+                {focusedId === 'action-undo' && (
+                    <div className="absolute inset-0 bg-gray-500/20 origin-left transition-transform duration-75 ease-linear" style={{ transform: `scaleX(${dwellProgress})` }} />
+                )}
+             </button>
+             <button
+                className={cn(
+                    "relative p-2 rounded-lg hover:bg-red-50 text-red-500 overflow-hidden",
+                    focusedId === 'action-clear' ? "ring-2 ring-red-400 bg-red-50" : ""
+                )}
+                onClick={() => dispatch({ type: 'CLEAR', source: 'mouse' })}
+                data-tool-id="action-clear"
+             >
+                <Trash2 className="w-6 h-6" />
+                {focusedId === 'action-clear' && (
+                    <div className="absolute inset-0 bg-red-500/20 origin-left transition-transform duration-75 ease-linear" style={{ transform: `scaleX(${dwellProgress})` }} />
+                )}
+             </button>
+
+            {/* Resume Hint */}
+            {state.mode === 'ToolSelect' && (
+                 <div className="mt-4 text-xs text-center text-gray-500 animate-pulse">
+                     Say &quot;Resume&quot; or select a tool
+                 </div>
+            )}
+        </div>
+
+        {/* Canvas Container */}
+        <div className="relative w-[800px] h-[600px] bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 cursor-crosshair">
+            <canvas
+                ref={canvasRef}
+                width={800}
+                height={600}
+                className="w-full h-full block"
+            />
+            {/* Visual feedback overlay (cursors etc) will go here */}
+        </div>
+
       </main>
+
+      {/* Debug Overlay */}
+      <div className="fixed bottom-4 right-4 bg-black/80 text-white p-4 rounded-lg text-xs font-mono w-80 pointer-events-none z-50">
+        <div className="font-bold border-b border-gray-600 pb-2 mb-2">State Monitor</div>
+        <div className="grid grid-cols-2 gap-2">
+            <div>Mode: <span className="text-yellow-400">{state.mode}</span></div>
+            <div>Tool: {state.activeTool}</div>
+            <div>Color: {state.activeColor}</div>
+            <div>Size: {state.brushSize}</div>
+            <div className="col-span-2 text-gray-400 mt-2 border-t border-gray-700 pt-1">
+                Last Action: <span className="text-green-400">{state.lastIntent}</span>
+                {state.lastSource && <span className="text-gray-500 ml-2">({state.lastSource})</span>}
+            </div>
+            {lastTranscript && (
+                <div className="col-span-2 text-gray-400 mt-1">
+                    Voice: <span className="text-blue-300 italic">&quot;{lastTranscript}&quot;</span>
+                </div>
+            )}
+            <div className="col-span-2 text-gray-400 mt-1">
+                Hand: {fingertipCoords ? `${fingertipCoords.x}, ${fingertipCoords.y}` : "None"}
+            </div>
+            <div className="col-span-2 text-gray-400 mt-1">
+                Gaze: {gazePos ? `${Math.round(gazePos.x)}, ${Math.round(gazePos.y)}` : "None"} (Focus: {focusedId})
+            </div>
+        </div>
+      </div>
+
     </div>
   );
 }
