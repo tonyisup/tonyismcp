@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { AppState } from '../types';
 
 // Types for MediaPipe Hands
 interface Results {
@@ -21,27 +20,20 @@ declare global {
   }
 }
 
-const SMOOTHING_FACTOR = 0.2;
-const DROPOUT_THRESHOLD_MS = 200;
+const PINCH_THRESHOLD = 0.05; // Normalized distance threshold for pinch
 
 export function useHandTracking(
   videoRef: React.RefObject<HTMLVideoElement | null>,
-  canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  stateRef: React.RefObject<AppState>
+  // canvasRef removed as we don't draw anymore
 ) {
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [isHandDetected, setIsHandDetected] = useState(false);
   const [fingertipCoords, setFingertipCoords] = useState<{ x: number; y: number } | null>(null);
+  const [isPinched, setIsPinched] = useState(false);
 
   const handsRef = useRef<Hands | null>(null);
   const animationFrameIdRef = useRef<number | null>(null);
   const isCameraRunningRef = useRef(false);
-
-  // Drawing State Refs
-  const lastPositionRef = useRef<{ x: number; y: number } | null>(null);
-  const currentPositionRef = useRef<{ x: number; y: number } | null>(null);
-  const lastDetectionTimeRef = useRef(0);
-  const isDrawingRef = useRef(false);
 
   // Load Script
   useEffect(() => {
@@ -57,70 +49,38 @@ export function useHandTracking(
   }, []);
 
   const onResults = useCallback((results: Results) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // We only draw if we are in Paint mode
-    const currentState = stateRef.current;
-    const isPaintMode = currentState.mode === 'Paint';
-
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       const landmarks = results.multiHandLandmarks[0];
       const indexFingerTip = landmarks[8];
+      const thumbTip = landmarks[4];
 
       setIsHandDetected(true);
-      lastDetectionTimeRef.current = Date.now();
-      isDrawingRef.current = true;
 
-      // Calculate pixel coordinates (Mirror X)
-      const rawX = (1 - indexFingerTip.x) * canvas.width;
-      const rawY = indexFingerTip.y * canvas.height;
+      // Calculate Pinch (Euclidean distance between thumb and index)
+      // Since coordinates are normalized (0-1), we can use them directly or correct for aspect ratio.
+      // For simple pinch detection, raw distance usually suffices.
+      const dx = indexFingerTip.x - thumbTip.x;
+      const dy = indexFingerTip.y - thumbTip.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-      setFingertipCoords({ x: Math.round(rawX), y: Math.round(rawY) });
+      setIsPinched(distance < PINCH_THRESHOLD);
 
-      // Smoothing
-      if (!currentPositionRef.current) {
-        currentPositionRef.current = { x: rawX, y: rawY };
-        lastPositionRef.current = { x: rawX, y: rawY };
-      } else {
-        const smoothX = currentPositionRef.current.x + (rawX - currentPositionRef.current.x) * SMOOTHING_FACTOR;
-        const smoothY = currentPositionRef.current.y + (rawY - currentPositionRef.current.y) * SMOOTHING_FACTOR;
-
-        lastPositionRef.current = currentPositionRef.current;
-        currentPositionRef.current = { x: smoothX, y: smoothY };
-      }
-
-      // Draw if in Paint mode
-      if (isPaintMode && lastPositionRef.current && currentPositionRef.current) {
-        ctx.beginPath();
-        ctx.moveTo(lastPositionRef.current.x, lastPositionRef.current.y);
-        ctx.lineTo(currentPositionRef.current.x, currentPositionRef.current.y);
-
-        ctx.strokeStyle = currentState.activeTool === 'eraser' ? '#ffffff' : currentState.activeColor;
-        ctx.lineWidth = currentState.brushSize;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
-        ctx.stroke();
-      }
+      // Optional: We can still expose fingertip coords if we want to show a cursor,
+      // though the prompt implies Gaze is the primary pointer for selection.
+      // But maybe useful for debug.
+      // We don't have canvas dimensions here anymore, so we return normalized coords?
+      // Or we can pass in window dimensions.
+      // Let's return raw normalized coords or leave it null if not needed.
+      // The previous implementation used canvasRef to scale.
+      // Let's just return normalized 0-1.
+      setFingertipCoords({ x: indexFingerTip.x, y: indexFingerTip.y });
 
     } else {
       setIsHandDetected(false);
-      if (isDrawingRef.current) {
-         const timeSinceLastDetect = Date.now() - lastDetectionTimeRef.current;
-         if (timeSinceLastDetect > DROPOUT_THRESHOLD_MS) {
-            isDrawingRef.current = false;
-            lastPositionRef.current = null;
-            currentPositionRef.current = null;
-         }
-      } else {
-         lastPositionRef.current = null;
-         currentPositionRef.current = null;
-      }
+      setIsPinched(false);
+      setFingertipCoords(null);
     }
-  }, [canvasRef, stateRef]);
+  }, []);
 
   // Initialize MediaPipe and Camera
   useEffect(() => {
@@ -185,9 +145,8 @@ export function useHandTracking(
       if (currentVideoRef?.srcObject) {
         (currentVideoRef.srcObject as MediaStream).getTracks().forEach(track => track.stop());
       }
-      // handsRef.current?.close(); // Optional, sometimes causes errors on fast unmounts
     };
   }, [isScriptLoaded, onResults, videoRef]);
 
-  return { isScriptLoaded, isHandDetected, fingertipCoords };
+  return { isScriptLoaded, isHandDetected, isPinched, fingertipCoords };
 }
