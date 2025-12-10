@@ -8,9 +8,21 @@ import { useHandTracking } from './components/useHandTracking';
 import { useVoiceControl } from './components/useVoiceControl';
 import { useGazeTracking } from './components/useGazeTracking';
 import { CalibrationOverlay } from './components/CalibrationOverlay';
+import { ColorType } from './types'; // Import ColorType
 
-// Components (We will extract these later or keep them here if small)
-// But for now, I'll put the shell here.
+// Drawing Utils
+const getCoordinates = (event: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    let x, y;
+    if ('touches' in event) {
+        x = event.touches[0].clientX - rect.left;
+        y = event.touches[0].clientY - rect.top;
+    } else {
+        x = (event as React.MouseEvent).nativeEvent.offsetX;
+        y = (event as React.MouseEvent).nativeEvent.offsetY;
+    }
+    return { x, y };
+};
 
 export default function UnifiedPaintPage() {
   const [state, dispatch] = useReducer(appReducer, initialState);
@@ -19,12 +31,17 @@ export default function UnifiedPaintPage() {
   const [isCalibrationOpen, setIsCalibrationOpen] = useState(false);
   const [activeRegression, setActiveRegression] = useState('ridge');
 
+  // Drawing State (Mouse/Touch)
+  const [isDrawing, setIsDrawing] = useState(false);
+  const lastDrawPos = useRef<{ x: number; y: number } | null>(null);
+
   // Refs for State
   const stateRef = useRef(state);
   useEffect(() => { stateRef.current = state; }, [state]);
 
   // --- Hand Tracking Hook ---
-  const { isHandDetected, fingertipCoords } = useHandTracking(videoRef, canvasRef, stateRef);
+  // We no longer pass canvasRef as drawing is done here
+  const { isHandDetected, isPinched, fingertipCoords } = useHandTracking(videoRef);
 
   // --- Voice Control Hook ---
   const { isListening: isVoiceListening, lastTranscript } = useVoiceControl(dispatch);
@@ -34,12 +51,80 @@ export default function UnifiedPaintPage() {
     isGazeReady,
     gazePos,
     focusedId,
-    dwellProgress,
     setRegressionModel,
     clearCalibrationData
   } = useGazeTracking(stateRef, dispatch);
 
   const isReady = isHandDetected || isGazeReady; // Simplified readiness check
+
+  // --- Selection Logic (Gaze + Gesture) ---
+  const wasPinchedRef = useRef(false);
+
+  useEffect(() => {
+    // Detect Rising Edge of Pinch (False -> True)
+    if (isPinched && !wasPinchedRef.current) {
+        // Pinch Start!
+        if (focusedId) {
+            console.log(`Pinch Selection Triggered on: ${focusedId}`);
+            // Mode Switching Logic based on Gaze Target
+            if (focusedId === 'toolbar-area' && state.mode === 'Paint') {
+                 dispatch({ type: 'SET_MODE', payload: 'ToolSelect', source: 'gesture' });
+            }
+            else if (focusedId.startsWith('tool-')) {
+                const tool = focusedId.replace('tool-', '');
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                dispatch({ type: 'SELECT_TOOL', payload: tool as any, source: 'gesture' });
+            }
+            else if (focusedId.startsWith('color-')) {
+                const color = focusedId.replace('color-', '');
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                dispatch({ type: 'SELECT_COLOR', payload: color as any, source: 'gesture' });
+            }
+            else if (focusedId.startsWith('action-')) {
+                const action = focusedId.replace('action-', '');
+                if (action === 'undo') dispatch({ type: 'UNDO', source: 'gesture' });
+                if (action === 'clear') dispatch({ type: 'CLEAR', source: 'gesture' });
+            }
+        }
+    }
+    wasPinchedRef.current = isPinched;
+  }, [isPinched, focusedId, state.mode]);
+
+
+  // --- Canvas Drawing Handlers ---
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+      if (state.mode !== 'Paint') return;
+      if (!canvasRef.current) return;
+      const { x, y } = getCoordinates(e, canvasRef.current);
+      lastDrawPos.current = { x, y };
+      setIsDrawing(true);
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+      if (!isDrawing || !lastDrawPos.current || !canvasRef.current) return;
+      e.preventDefault(); // Prevent scrolling on touch
+
+      const ctx = canvasRef.current.getContext('2d');
+      if (!ctx) return;
+      const { x, y } = getCoordinates(e, canvasRef.current);
+
+      ctx.beginPath();
+      ctx.moveTo(lastDrawPos.current.x, lastDrawPos.current.y);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = state.activeTool === 'eraser' ? '#ffffff' : state.activeColor;
+      ctx.lineWidth = state.brushSize;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      lastDrawPos.current = { x, y };
+  };
+
+  const stopDrawing = () => {
+      setIsDrawing(false);
+      lastDrawPos.current = null;
+  };
+
 
   // Handle External Triggers (Clear/Undo)
   useEffect(() => {
@@ -48,11 +133,7 @@ export default function UnifiedPaintPage() {
         if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
         dispatch({ type: 'RESET_TRIGGERS' });
     }
-    // Undo is harder with canvas without a history stack.
-    // For prototype, we might skip actual undo implementation or just log it,
-    // unless we build a history buffer. Let's stick to Clear for now or simple "Flash" feedback.
     if (state.isUndoTriggered) {
-        // Placeholder: Flash red or something
         console.log("Undo triggered - (Not implemented for canvas bitmap yet)");
         dispatch({ type: 'RESET_TRIGGERS' });
     }
@@ -65,13 +146,13 @@ export default function UnifiedPaintPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col font-sans relative overflow-hidden">
-      {/* Shared Video Element (Hidden or Small Preview) */}
+      {/* Shared Video Element */}
       <video
         ref={videoRef}
         className="fixed bottom-4 left-4 w-48 h-auto rounded-lg border-2 border-white shadow-lg z-50 scale-x-[-1] opacity-50 hover:opacity-100 transition-opacity"
         playsInline
         muted
-        autoPlay // Ensure it plays
+        autoPlay
       />
 
       {/* Calibration Overlay */}
@@ -133,12 +214,15 @@ export default function UnifiedPaintPage() {
         {/* Gaze Cursor */}
         {gazePos && (
             <div
-                className="fixed w-6 h-6 rounded-full border-2 border-red-500 bg-red-500/30 pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75 ease-out"
+                className={cn(
+                    "fixed w-6 h-6 rounded-full border-2 pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-75 ease-out",
+                    isPinched ? "border-green-500 bg-green-500/30 scale-125" : "border-red-500 bg-red-500/30"
+                )}
                 style={{ left: gazePos.x, top: gazePos.y }}
             />
         )}
 
-        {/* Toolbar (Visual Only for now, interactive via intents) */}
+        {/* Toolbar */}
         <div
             className={cn(
                 "absolute left-8 top-1/2 -translate-y-1/2 flex flex-col gap-4 p-4 bg-white rounded-xl shadow-xl transition-all duration-300 z-30",
@@ -154,20 +238,12 @@ export default function UnifiedPaintPage() {
                     className={cn(
                         "relative w-10 h-10 rounded-full border-2 transition-all cursor-pointer overflow-hidden",
                         state.activeColor === color ? "border-gray-900 scale-110" : "border-transparent",
-                        focusedId === `color-${color}` ? "scale-125 shadow-lg" : ""
+                        focusedId === `color-${color}` ? "scale-125 shadow-lg ring-2 ring-blue-300" : ""
                     )}
                     style={{ backgroundColor: color }}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick={() => dispatch({ type: 'SELECT_COLOR', payload: color as any, source: 'mouse' })}
+                    onClick={() => dispatch({ type: 'SELECT_COLOR', payload: color as ColorType, source: 'mouse' })}
                     data-tool-id={`color-${color}`}
                 >
-                    {/* Dwell Progress Overlay */}
-                    {focusedId === `color-${color}` && (
-                        <div
-                            className="absolute inset-0 bg-white/50 origin-bottom transition-transform duration-75 ease-linear"
-                            style={{ transform: `scaleY(${dwellProgress})` }}
-                        />
-                    )}
                 </div>
              ))}
 
@@ -184,9 +260,6 @@ export default function UnifiedPaintPage() {
                 data-tool-id="tool-brush"
              >
                 <Brush className="w-6 h-6" />
-                {focusedId === 'tool-brush' && (
-                    <div className="absolute inset-0 bg-blue-500/20 origin-left transition-transform duration-75 ease-linear" style={{ transform: `scaleX(${dwellProgress})` }} />
-                )}
              </button>
              <button
                 className={cn(
@@ -198,9 +271,6 @@ export default function UnifiedPaintPage() {
                  data-tool-id="tool-eraser"
              >
                 <Eraser className="w-6 h-6" />
-                {focusedId === 'tool-eraser' && (
-                    <div className="absolute inset-0 bg-blue-500/20 origin-left transition-transform duration-75 ease-linear" style={{ transform: `scaleX(${dwellProgress})` }} />
-                )}
              </button>
 
              <div className="h-px w-full bg-gray-200 my-2" />
@@ -214,9 +284,6 @@ export default function UnifiedPaintPage() {
                 data-tool-id="action-undo"
              >
                 <Undo className="w-6 h-6" />
-                {focusedId === 'action-undo' && (
-                    <div className="absolute inset-0 bg-gray-500/20 origin-left transition-transform duration-75 ease-linear" style={{ transform: `scaleX(${dwellProgress})` }} />
-                )}
              </button>
              <button
                 className={cn(
@@ -227,15 +294,12 @@ export default function UnifiedPaintPage() {
                 data-tool-id="action-clear"
              >
                 <Trash2 className="w-6 h-6" />
-                {focusedId === 'action-clear' && (
-                    <div className="absolute inset-0 bg-red-500/20 origin-left transition-transform duration-75 ease-linear" style={{ transform: `scaleX(${dwellProgress})` }} />
-                )}
              </button>
 
-            {/* Resume Hint */}
+            {/* Instruction */}
             {state.mode === 'ToolSelect' && (
                  <div className="mt-4 text-xs text-center text-gray-500 animate-pulse">
-                     Say &quot;Resume&quot; or select a tool
+                     Look & Pinch to Select
                  </div>
             )}
         </div>
@@ -247,8 +311,14 @@ export default function UnifiedPaintPage() {
                 width={800}
                 height={600}
                 className="w-full h-full block"
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
             />
-            {/* Visual feedback overlay (cursors etc) will go here */}
         </div>
 
       </main>
@@ -274,11 +344,12 @@ export default function UnifiedPaintPage() {
                 </div>
             )}
             <div className="col-span-2 text-gray-400 mt-1">
-                Hand: {fingertipCoords ? `${fingertipCoords.x}, ${fingertipCoords.y}` : "None"}
-            </div>
-            <div className="col-span-2 text-gray-400 mt-1">
                 Gaze: {gazePos ? `${Math.round(gazePos.x)}, ${Math.round(gazePos.y)}` : "None"} (Focus: {focusedId})
             </div>
+            <div className="col-span-2 text-gray-400 mt-1">
+                 Pinch: <span className={isPinched ? "text-green-500 font-bold" : "text-red-500"}>{isPinched ? "YES" : "NO"}</span>
+            </div>
+
 
             {/* Regression Settings */}
             <div className="col-span-2 border-t border-gray-700 mt-2 pt-2">
