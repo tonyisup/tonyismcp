@@ -8,6 +8,7 @@ import { useHandTracking } from './components/useHandTracking';
 import { useVoiceControl } from './components/useVoiceControl';
 import { useGazeTracking } from './components/useGazeTracking';
 import { CalibrationOverlay } from './components/CalibrationOverlay';
+import { ColorType } from './types'; // Import ColorType
 
 // Drawing Utils
 const getCoordinates = (event: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
@@ -240,7 +241,7 @@ export default function UnifiedPaintPage() {
                         focusedId === `color-${color}` ? "scale-125 shadow-lg ring-2 ring-blue-300" : ""
                     )}
                     style={{ backgroundColor: color }}
-                    onClick={() => dispatch({ type: 'SELECT_COLOR', payload: color as any, source: 'mouse' })}
+                    onClick={() => dispatch({ type: 'SELECT_COLOR', payload: color as ColorType, source: 'mouse' })}
                     data-tool-id={`color-${color}`}
                 >
                 </div>
