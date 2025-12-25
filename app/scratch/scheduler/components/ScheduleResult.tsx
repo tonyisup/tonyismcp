@@ -2,7 +2,7 @@ import React from 'react';
 import { GeneratedSchedule } from '../scheduler';
 import { SchedulerData } from '../types';
 import { Button } from '@/components/ui/button';
-import { Copy, Printer } from 'lucide-react';
+import { Copy, Printer, Download } from 'lucide-react';
 
 // NOTE: AssignedShift and GeneratedSchedule are currently in scheduler.ts.
 // I should move them to types.ts to avoid circular deps if I used types inside scheduler.
@@ -20,6 +20,41 @@ export function ScheduleResult({ schedule, data, onReset }: ScheduleResultProps)
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['Day', 'Shift', 'Start Time', 'End Time', 'Role', 'Employee'];
+    const rows: string[][] = [];
+
+    schedule.forEach(day => {
+      day.assignments.forEach(assignment => {
+        const shift = data.shifts.find(s => s.id === assignment.shiftId);
+        const role = data.roles.find(r => r.id === assignment.roleId);
+        rows.push([
+          day.day,
+          shift?.name || 'Unknown',
+          shift?.start || '',
+          shift?.end || '',
+          role?.name || 'Unknown',
+          assignment.employeeName
+        ]);
+      });
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `schedule_${data.businessName.replace(/\s+/g, '_').toLowerCase()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleCopy = () => {
@@ -49,6 +84,9 @@ export function ScheduleResult({ schedule, data, onReset }: ScheduleResultProps)
       <div className="flex items-center justify-between no-print">
         <h2 className="text-2xl font-bold tracking-tight">Your Schedule</h2>
         <div className="flex gap-2">
+           <Button variant="outline" size="sm" onClick={handleExportCSV}>
+             <Download className="w-4 h-4 mr-2" /> Export CSV
+           </Button>
            <Button variant="outline" size="sm" onClick={handleCopy}>
              <Copy className="w-4 h-4 mr-2" /> Copy Text
            </Button>
@@ -58,7 +96,7 @@ export function ScheduleResult({ schedule, data, onReset }: ScheduleResultProps)
         </div>
       </div>
 
-      <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm print:border-black print:shadow-none">
+      <div id="printable-schedule" className="border border-border rounded-xl overflow-hidden bg-card shadow-sm print:border-black print:shadow-none">
          <div className="overflow-x-auto">
            <table className="w-full text-sm text-left">
              <thead className="bg-muted border-b border-border print:bg-white print:border-black">
@@ -114,9 +152,56 @@ export function ScheduleResult({ schedule, data, onReset }: ScheduleResultProps)
 
       <style jsx global>{`
         @media print {
+          @page {
+            size: landscape;
+            margin: 0.5cm;
+          }
+
+          /* Hide everything by default */
+          body {
+            visibility: hidden;
+            background: white;
+          }
+
+          /* Show only the schedule container and its children */
+          #printable-schedule {
+            visibility: visible;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            color: black !important;
+            z-index: 9999;
+            border: none !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+          }
+
+          #printable-schedule * {
+            visibility: visible;
+          }
+
+          /* Reset text colors for print */
+          #printable-schedule .text-muted-foreground,
+          #printable-schedule .text-foreground {
+            color: black !important;
+          }
+
+          /* Ensure table structure is good for print */
+          #printable-schedule table {
+            width: 100% !important;
+          }
+
+          #printable-schedule th,
+          #printable-schedule td {
+            border-color: #000 !important;
+            color: black !important;
+          }
+
           .no-print { display: none !important; }
-          body { background: white; }
-          .print-container { padding: 0; margin: 0; }
         }
       `}</style>
     </div>
