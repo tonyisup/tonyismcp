@@ -29,7 +29,7 @@ export function ConversationContainer({ messages, children }: ConversationContai
           {/* Avatar */}
           <div className={cn(
             "w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-medium border",
-            msg.sender === 'user' ? "bg-black text-white border-black" : "bg-white text-neutral-600 border-neutral-200"
+            msg.sender === 'user' ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"
           )}>
             {msg.sender === 'user' ? "ME" : "AI"}
           </div>
@@ -38,8 +38,8 @@ export function ConversationContainer({ messages, children }: ConversationContai
           <div className={cn(
             "p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm",
             msg.sender === 'user'
-              ? "bg-black text-white rounded-tr-none"
-              : "bg-white text-neutral-800 border border-neutral-100 rounded-tl-none"
+              ? "bg-primary text-primary-foreground rounded-tr-none"
+              : "bg-muted/50 text-foreground border border-border rounded-tl-none"
           )}>
             {msg.content}
           </div>
@@ -49,7 +49,7 @@ export function ConversationContainer({ messages, children }: ConversationContai
       {/* Active Input Area - Rendered as part of the flow */}
       {children && (
         <div className="flex gap-3 max-w-[90%] md:max-w-[80%] ml-auto flex-row-reverse animate-in fade-in slide-in-from-bottom-2 duration-300">
-           <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-medium border bg-black text-white border-black">
+           <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-medium border bg-primary text-primary-foreground border-primary">
              ME
            </div>
            <div className="w-full">

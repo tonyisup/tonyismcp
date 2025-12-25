@@ -110,17 +110,17 @@ export default function SchedulerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col items-center p-4 md:p-8 font-sans">
-      <div className="max-w-3xl w-full bg-white rounded-xl shadow-sm border border-neutral-200 min-h-[600px] h-[85vh] flex flex-col overflow-hidden relative">
+    <div className="dark min-h-screen bg-background flex flex-col items-center p-4 md:p-8 font-sans text-foreground">
+      <div className="max-w-3xl w-full bg-card rounded-xl shadow-sm border border-border min-h-[600px] h-[85vh] flex flex-col overflow-hidden relative text-foreground">
 
         {/* Header */}
-        <header className="p-4 border-b border-neutral-100 bg-white z-10 flex justify-between items-center">
+        <header className="p-4 border-b border-border bg-card z-10 flex justify-between items-center text-foreground">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight text-neutral-900">Scheduler</h1>
-            <p className="text-sm text-neutral-500">Minimalist Chat-First Scheduler</p>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">Scheduler</h1>
+            <p className="text-sm text-muted-foreground">Minimalist Chat-First Scheduler</p>
           </div>
           {state.currentStep === 'FINISHED' && (
-             <button onClick={reset} className="text-xs text-neutral-400 hover:text-neutral-900 underline">
+             <button onClick={reset} className="text-xs text-muted-foreground hover:text-foreground underline">
                New Schedule
              </button>
           )}
