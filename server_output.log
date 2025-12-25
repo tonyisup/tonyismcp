@@ -1,0 +1,21 @@
+
+> tonyismcp@0.1.0 dev
+> next dev --turbopack --port 3001
+
+   ▲ Next.js 15.5.7 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.0.2:3001
+
+ ✓ Starting...
+ ✓ Ready in 1487ms
+ ○ Compiling /scratch/scheduler ...
+ ✓ Compiled /scratch/scheduler in 4.7s
+ GET /scratch/scheduler 200 in 5467ms
+ GET /scratch/scheduler 200 in 170ms
+ GET /scratch/scheduler 200 in 179ms
+ GET /scratch/scheduler 200 in 160ms
+ GET /scratch/scheduler 200 in 153ms
+ GET /scratch/scheduler 200 in 157ms
+ GET /scratch/scheduler 200 in 183ms
+ GET /scratch/scheduler 200 in 172ms
+ GET /scratch/scheduler 200 in 252ms
