@@ -58,24 +58,24 @@ export function ScheduleResult({ schedule, data, onReset }: ScheduleResultProps)
         </div>
       </div>
 
-      <div className="border border-neutral-200 rounded-xl overflow-hidden bg-white shadow-sm print:border-black print:shadow-none">
+      <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm print:border-black print:shadow-none">
          <div className="overflow-x-auto">
            <table className="w-full text-sm text-left">
-             <thead className="bg-neutral-50 border-b border-neutral-200 print:bg-white print:border-black">
+             <thead className="bg-muted border-b border-border print:bg-white print:border-black">
                <tr>
-                 <th className="p-4 font-semibold text-neutral-900 w-32 border-r border-neutral-100">Shift</th>
+                 <th className="p-4 font-semibold text-foreground w-32 border-r border-border">Shift</th>
                  {schedule.map(day => (
-                   <th key={day.day} className="p-4 font-semibold text-neutral-900 min-w-[140px]">
+                   <th key={day.day} className="p-4 font-semibold text-foreground min-w-[140px]">
                      {day.day}
                    </th>
                  ))}
                </tr>
              </thead>
-             <tbody className="divide-y divide-neutral-100">
+             <tbody className="divide-y divide-border">
                {data.shifts.map(shift => (
                  <tr key={shift.id}>
-                   <td className="p-4 font-medium text-neutral-500 bg-neutral-50/50 border-r border-neutral-100 print:text-black">
-                     <div className="text-neutral-900">{shift.name}</div>
+                   <td className="p-4 font-medium text-muted-foreground bg-muted/50 border-r border-border print:text-black">
+                     <div className="text-foreground">{shift.name}</div>
                      <div className="text-xs">{shift.start} - {shift.end}</div>
                    </td>
                    {schedule.map(day => {
@@ -83,13 +83,13 @@ export function ScheduleResult({ schedule, data, onReset }: ScheduleResultProps)
                      return (
                        <td key={day.day + shift.id} className="p-4 align-top">
                          {assignments.length === 0 ? (
-                           <span className="text-neutral-300 italic text-xs">Empty</span>
+                           <span className="text-muted-foreground/30 italic text-xs">Empty</span>
                          ) : (
                            <div className="space-y-1">
                              {assignments.map((a, i) => (
                                <div key={i} className="flex flex-col">
-                                 <span className="font-medium text-neutral-900">{a.employeeName}</span>
-                                 <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
+                                 <span className="font-medium text-foreground">{a.employeeName}</span>
+                                 <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                                    {data.roles.find(r => r.id === a.roleId)?.name}
                                  </span>
                                </div>
@@ -107,7 +107,7 @@ export function ScheduleResult({ schedule, data, onReset }: ScheduleResultProps)
       </div>
 
       <div className="flex justify-center pt-8 no-print">
-        <Button variant="ghost" onClick={onReset} className="text-neutral-400 hover:text-red-500">
+        <Button variant="ghost" onClick={onReset} className="text-muted-foreground hover:text-destructive">
           Start Over
         </Button>
       </div>

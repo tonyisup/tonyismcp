@@ -7,14 +7,14 @@ import { Plus, Trash2, Clock } from 'lucide-react';
 // --- Shared UI ---
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <label className="text-xs font-medium text-neutral-500 uppercase tracking-wide block mb-1.5">{children}</label>;
+  return <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide block mb-1.5">{children}</label>;
 }
 
 function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className="flex h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
     />
   );
 }
@@ -24,7 +24,7 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
 export function NameInput({ onComplete }: { onComplete: (name: string) => void }) {
   const [value, setValue] = useState('');
   return (
-    <div className="flex gap-2 bg-white p-2 rounded-xl border border-neutral-200 shadow-sm">
+    <div className="flex gap-2 bg-card p-2 rounded-xl border border-border shadow-sm">
       <Input
         autoFocus
         placeholder="e.g. Joe's Diner"
@@ -45,7 +45,7 @@ export function HoursInput({ initial, onComplete }: { initial: OperatingHours, o
   const [hours, setHours] = useState(initial);
 
   return (
-    <Card className="p-4 w-full bg-white shadow-sm border-neutral-200 space-y-4">
+    <Card className="p-4 w-full bg-card shadow-sm border-border space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Weekdays Open</Label>
@@ -117,7 +117,7 @@ export function ShiftDefiner({
   return (
     <div className="space-y-3 w-full">
       {shifts.map((shift) => (
-        <div key={shift.id} className="flex gap-2 items-center bg-white p-2 rounded-lg border border-neutral-200">
+        <div key={shift.id} className="flex gap-2 items-center bg-card p-2 rounded-lg border border-border">
            <Input
              className="w-1/3"
              value={shift.name}
@@ -130,7 +130,7 @@ export function ShiftDefiner({
              value={shift.start}
              onChange={e => updateShift(shift.id, 'start', e.target.value)}
            />
-           <span className="text-neutral-400">-</span>
+           <span className="text-muted-foreground">-</span>
            <Input
              className="w-1/4"
              type="time"
@@ -138,7 +138,7 @@ export function ShiftDefiner({
              onChange={e => updateShift(shift.id, 'end', e.target.value)}
            />
            <Button variant="ghost" size="icon" onClick={() => removeShift(shift.id)}>
-             <Trash2 className="w-4 h-4 text-neutral-400 hover:text-red-500" />
+             <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
            </Button>
         </div>
       ))}
@@ -170,12 +170,12 @@ export function RoleInput({ onComplete }: { onComplete: (roles: Role[]) => void 
   };
 
   return (
-    <Card className="p-4 w-full bg-white shadow-sm border-neutral-200 space-y-4">
+    <Card className="p-4 w-full bg-card shadow-sm border-border space-y-4">
       <div className="flex flex-wrap gap-2">
         {roles.map(r => (
-          <div key={r.id} className="bg-neutral-100 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+          <div key={r.id} className="bg-muted px-3 py-1 rounded-full text-sm flex items-center gap-2 text-foreground">
             {r.name}
-            <button onClick={() => setRoles(roles.filter(x => x.id !== r.id))} className="text-neutral-400 hover:text-neutral-600">×</button>
+            <button onClick={() => setRoles(roles.filter(x => x.id !== r.id))} className="text-muted-foreground hover:text-foreground">×</button>
           </div>
         ))}
       </div>
@@ -208,7 +208,7 @@ export function StaffCountInput({ roles, onComplete }: { roles: Role[], onComple
   };
 
   return (
-    <Card className="p-4 w-full bg-white shadow-sm border-neutral-200 space-y-4">
+    <Card className="p-4 w-full bg-card shadow-sm border-border space-y-4">
       {roles.map(role => (
         <div key={role.id} className="flex items-center justify-between">
           <span className="text-sm font-medium">{role.name}s</span>
@@ -257,15 +257,15 @@ export function CoverageInput({
   return (
     <div className="space-y-4 w-full">
       {shifts.map(shift => (
-        <Card key={shift.id} className="p-4 bg-white border-neutral-200">
+        <Card key={shift.id} className="p-4 bg-card border-border">
           <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-4 h-4 text-neutral-400" />
+            <Clock className="w-4 h-4 text-muted-foreground" />
             <h3 className="font-medium text-sm">{shift.name} ({shift.start} - {shift.end})</h3>
           </div>
           <div className="space-y-3">
             {roles.map(role => (
               <div key={role.id} className="flex items-center justify-between text-sm">
-                <span className="text-neutral-600">{role.name}s needed:</span>
+                <span className="text-muted-foreground">{role.name}s needed:</span>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => update(shift.id, role.id, -1)}>-</Button>
                   <span className="w-4 text-center font-medium">{getVal(shift.id, role.id)}</span>
