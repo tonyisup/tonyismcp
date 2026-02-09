@@ -1,72 +1,66 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft, Book, Download, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { BrutalistButton } from "@/components/ui/brutalist-button";
 
 export default function ResumePage() {
   return (
-    <main className="min-h-screen bg-background p-8 text-foreground">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <main className="min-h-screen bg-white p-8 text-black font-mono">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="w-full flex items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b-[4px] border-black pb-8">
+          <div className="flex flex-wrap items-center gap-4">
             <Link href="/">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
+              <BrutalistButton href="/" className="text-sm px-4 py-2">
+                <ArrowLeft className="h-4 w-4 inline mr-2" />
                 Back to Home
-              </Button>
+              </BrutalistButton>
             </Link>
-            <Link href="/resume/certificates">
-              <Button variant="outline" size="sm">
-                <Book className="h-4 w-4" />
-                Certificates
-              </Button>
-            </Link>
-            <p className="w-full text-center text-sm text-muted-foreground">Last updated: October 17, 2025</p>
+            <BrutalistButton href="/resume/certificates" variant="secondary" className="text-sm px-4 py-2">
+              <Book className="h-4 w-4 inline mr-2" />
+              Certificates
+            </BrutalistButton>
+            <p className="text-sm font-bold uppercase bg-yellow-400 px-2 py-1 border-[2px] border-black inline-block">
+              Last updated: February 2026
+            </p>
           </div>
-          <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <a
-                href="/Resume.pdf"
-                download="Antonio_Villanueva_Resume.pdf"
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Download PDF
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <a
-                href="/Resume.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Open in New Tab
-              </a>
-            </Button>
+          <div className="flex gap-4">
+            <a
+              href="/Resume.pdf"
+              download="Antonio_Villanueva_Resume.pdf"
+              className="inline-flex items-center gap-2 font-bold uppercase hover:underline decoration-4 decoration-yellow-400"
+            >
+              <Download className="h-4 w-4" />
+              Download PDF
+            </a>
+            <a
+              href="/Resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 font-bold uppercase hover:underline decoration-4 decoration-yellow-400"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Open in New Tab
+            </a>
           </div>
         </div>
 
-        {/* PDF Display */}
-        <Card>
-          <CardContent className="p-0">
-            <div className="w-full h-[calc(100vh-200px)] min-h-[600px]">
-              <iframe
-                src="/Resume.pdf"
-                width="100%"
-                height="100%"
-                className="border-0"
-                title="Antonio Villanueva Resume"
-                style={{ minHeight: '600px' }}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* PDF Display Container */}
+        <div className="border-[4px] border-black shadow-[12px_12px_0_0_rgba(0,0,0,1)] bg-gray-100 p-2">
+          <div className="w-full h-[calc(100vh-250px)] min-h-[600px] border-[2px] border-black bg-white">
+            <iframe
+              src="/Resume.pdf"
+              width="100%"
+              height="100%"
+              className="w-full h-full"
+              title="Antonio Villanueva Resume"
+            />
+          </div>
+        </div>
 
         {/* Footer Info */}
-        <div className="text-center text-sm text-muted-foreground">
+        <div className="text-center text-sm font-bold uppercase opacity-60">
           <p>If the PDF doesn&apos;t load properly, try downloading it or opening in a new tab.</p>
         </div>
       </div>

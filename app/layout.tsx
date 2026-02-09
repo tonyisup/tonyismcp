@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./components/providers";
-import { ModeToggle } from "./components/mode-toggle";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -15,8 +9,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Antonio Villanueva",
-  description: "AKA Tony Is Up AKA MCP",
+  title: "Tony Is Up | Brutalist Portfolio",
+  description: "Antonio Villanueva - STEM. EDM. ENM.",
 };
 
 export default function RootLayout({
@@ -27,10 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistMono.variable} font-mono antialiased bg-background text-foreground selection:bg-yellow-400 selection:text-black`}
       >
         <Providers>
-          <ModeToggle />
           {children}
         </Providers>
       </body>
