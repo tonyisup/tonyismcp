@@ -81,7 +81,7 @@ export default function TetrisPage() {
       borderColor = "border-white/20";
     } else if (isShadow) {
       bgColor = "bg-zinc-700/50";
-      borderColor = "border-white/10";
+      borderColor = currentPiece!.color.replace("bg-", "border-");
     } else if (value) {
       // It's a locked block
       bgColor = value as string;
@@ -115,6 +115,7 @@ export default function TetrisPage() {
             />
           </div>
           <button
+            type="button"
             onClick={togglePause}
             className="p-2 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors"
           >
@@ -227,6 +228,7 @@ export default function TetrisPage() {
                 <h2 className="text-2xl font-bold text-zinc-100 mb-2">Board Full</h2>
                 <p className="text-zinc-400 mb-6 text-sm">Take a breath. Ready to go again?</p>
                 <button
+                  type="button"
                   onClick={resetGame}
                   className="px-6 py-3 bg-zinc-200 text-zinc-900 font-bold rounded hover:bg-white transition-colors uppercase tracking-wider text-sm w-full"
                 >
@@ -241,6 +243,7 @@ export default function TetrisPage() {
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center rounded-sm z-10">
               <h2 className="text-2xl font-bold text-zinc-300 tracking-widest uppercase mb-4">Paused</h2>
               <button
+                type="button"
                 onClick={togglePause}
                 className="px-6 py-2 border-2 border-zinc-500 text-zinc-300 font-bold rounded hover:bg-zinc-800 transition-colors uppercase text-sm"
               >
@@ -280,6 +283,7 @@ export default function TetrisPage() {
       {/* Mobile Controls Bottom */}
       <div className="mt-8 grid grid-cols-5 gap-2 w-full max-w-[350px] md:max-w-md px-2">
         <button
+          type="button"
           onClick={moveLeft}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
           aria-label="Move Left"
@@ -287,6 +291,7 @@ export default function TetrisPage() {
           <ArrowLeft size={24} />
         </button>
         <button
+          type="button"
           onClick={rotate}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
           aria-label="Rotate"
@@ -294,6 +299,7 @@ export default function TetrisPage() {
           <RotateCw size={24} />
         </button>
         <button
+          type="button"
           onClick={hardDrop}
           className="bg-zinc-200 text-zinc-900 hover:bg-white active:bg-zinc-300 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-400 active:border-b-0 active:translate-y-1"
           aria-label="Hard Drop"
@@ -301,6 +307,7 @@ export default function TetrisPage() {
           <ArrowDownToLine size={24} />
         </button>
         <button
+          type="button"
           onClick={moveRight}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
           aria-label="Move Right"
@@ -308,12 +315,13 @@ export default function TetrisPage() {
           <ArrowRight size={24} />
         </button>
         <button
+          type="button"
           onClick={holdPiece}
-          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
+          className="relative flex-col bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
           aria-label="Stash"
         >
           <Settings size={20} className="mb-1" /> {/* Using Settings as a stash icon, or could use another */}
-          <span className="text-[10px] absolute font-bold mt-5">STASH</span>
+          <span className="text-[10px] font-bold mt-1">STASH</span>
         </button>
       </div>
 

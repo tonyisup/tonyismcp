@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 // Define Tetromino shapes and colors (muted palette)
 const TETROMINOES = {
@@ -141,75 +141,77 @@ export const useTetris = () => {
     return false;
   }, [board]);
 
+  const commitPieceToBoard = useCallback((piece: Piece, dropY: number) => {
+     setBoard(prev => {
+         const newBoard = prev.map(row => [...row]);
+         let gameOver = false;
+
+         piece.shape.forEach((row, y) => {
+             row.forEach((val, x) => {
+                 if (val) {
+                     const boardY = dropY + y;
+                     if (boardY < 0 || (boardY >= 0 && boardY < BOARD_HEIGHT && prev[boardY][piece.x + x] !== 0)) {
+                         gameOver = true;
+                     } else if (boardY < BOARD_HEIGHT) {
+                         newBoard[boardY][piece.x + x] = piece.color;
+                     }
+                 }
+             });
+         });
+
+         if (gameOver) {
+             setIsGameOver(true);
+             return prev;
+         }
+
+         const filteredBoard = newBoard.filter(row => row.some(cell => cell === 0));
+         const linesCleared = BOARD_HEIGHT - filteredBoard.length;
+         const emptyLines = Array.from({ length: linesCleared }, () => Array(BOARD_WIDTH).fill(0));
+         return [...emptyLines, ...filteredBoard];
+     });
+
+     setCurrentPiece(nextPiece);
+     setNextPiece(getRandomPiece());
+     setCanHold(true);
+  }, [nextPiece]);
+
   // Lock piece and clear lines
   const lockPiece = useCallback(() => {
     if (!currentPiece) return;
-
-    setBoard(prev => {
-      const newBoard = prev.map(row => [...row]);
-      let gameOver = false;
-
-      // Add piece to board
-      currentPiece.shape.forEach((row, y) => {
-        row.forEach((val, x) => {
-          if (val) {
-            const boardY = currentPiece.y + y;
-            if (boardY < 0 || (boardY >= 0 && boardY < BOARD_HEIGHT && prev[boardY][currentPiece.x + x] !== 0)) {
-              gameOver = true;
-            } else if (boardY < BOARD_HEIGHT) {
-              newBoard[boardY][currentPiece.x + x] = currentPiece.color;
-            }
-          }
-        });
-      });
-
-      if (gameOver) {
-        setIsGameOver(true);
-        return prev;
-      }
-
-      // Clear completed lines
-      const filteredBoard = newBoard.filter(row => row.some(cell => cell === 0));
-      const linesCleared = BOARD_HEIGHT - filteredBoard.length;
-
-      const emptyLines = Array.from({ length: linesCleared }, () => Array(BOARD_WIDTH).fill(0));
-      return [...emptyLines, ...filteredBoard];
-    });
-
-    // Get next piece
-    setCurrentPiece(nextPiece);
-    setNextPiece(getRandomPiece());
-    setCanHold(true);
-  }, [currentPiece, nextPiece]);
+    commitPieceToBoard(currentPiece, currentPiece.y);
+  }, [currentPiece, commitPieceToBoard]);
 
   // Move piece down
-  const moveDown = useCallback(() => {
-    if (!currentPiece || isGameOver || isPaused) return;
+  const currentPieceRef = useRef<Piece | null>(currentPiece);
+  useEffect(() => {
+    currentPieceRef.current = currentPiece;
+  }, [currentPiece]);
 
-    const newPiece = { ...currentPiece, y: currentPiece.y + 1 };
+  const moveDown = useCallback(() => {
+    const piece = currentPieceRef.current;
+    if (!piece || isGameOver || isPaused) return;
+
+    const newPiece = { ...piece, y: piece.y + 1 };
 
     if (checkCollision(newPiece)) {
-      lockPiece();
+      commitPieceToBoard(piece, piece.y);
     } else {
       setCurrentPiece(newPiece);
     }
-  }, [currentPiece, isGameOver, isPaused, checkCollision, lockPiece]);
+  }, [isGameOver, isPaused, checkCollision, commitPieceToBoard]);
 
   // Game loop
   useEffect(() => {
     let dropInterval: NodeJS.Timeout;
 
-    // We specifically disable exhaustive-deps here so that the interval does not reset
-    // when currentPiece changes (like moving left/right), allowing normal falling pace.
-    if (currentPiece && !isGameOver && !isPaused) {
+    if (currentPieceRef.current && !isGameOver && !isPaused) {
       dropInterval = setInterval(moveDown, getSpeedMs());
     }
 
     return () => {
       if (dropInterval) clearInterval(dropInterval);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isGameOver, isPaused, speed, moveDown, getSpeedMs]); // Removed currentPiece from dependencies to avoid resetting interval on lateral movement
+  }, [isGameOver, isPaused, speed, getSpeedMs, moveDown]);
 
   // Controls
   const moveLeft = useCallback(() => {
@@ -254,39 +256,8 @@ export const useTetris = () => {
          dropY++;
      }
 
-     // Update board with dropped piece directly
-     setBoard(prev => {
-         const newBoard = prev.map(row => [...row]);
-         let gameOver = false;
-
-         currentPiece.shape.forEach((row, y) => {
-             row.forEach((val, x) => {
-                 if (val) {
-                     const boardY = dropY + y;
-                 if (boardY < 0 || (boardY >= 0 && boardY < BOARD_HEIGHT && prev[boardY][currentPiece.x + x] !== 0)) {
-                         gameOver = true;
-                     } else if (boardY < BOARD_HEIGHT) {
-                         newBoard[boardY][currentPiece.x + x] = currentPiece.color;
-                     }
-                 }
-             });
-         });
-
-         if (gameOver) {
-             setIsGameOver(true);
-             return prev;
-         }
-
-         const filteredBoard = newBoard.filter(row => row.some(cell => cell === 0));
-         const linesCleared = BOARD_HEIGHT - filteredBoard.length;
-         const emptyLines = Array.from({ length: linesCleared }, () => Array(BOARD_WIDTH).fill(0));
-         return [...emptyLines, ...filteredBoard];
-     });
-
-     setCurrentPiece(nextPiece);
-     setNextPiece(getRandomPiece());
-     setCanHold(true);
-  }, [currentPiece, nextPiece, isGameOver, isPaused, checkCollision]);
+     commitPieceToBoard(currentPiece, dropY);
+  }, [currentPiece, isGameOver, isPaused, checkCollision, commitPieceToBoard]);
 
 
   const holdPiece = useCallback(() => {
@@ -306,7 +277,8 @@ export const useTetris = () => {
       });
 
       setHeldPiece({
-        ...getRandomPiece(), // dummy, we just need type/shape
+        x: 0, // values that will be ignored
+        y: 0,
         type: temp,
         shape: TETROMINOES[temp].shape,
         color: TETROMINOES[temp].color
@@ -339,21 +311,21 @@ export const useTetris = () => {
   }, [isGameOver]);
 
   // Calculate shadow piece
-  const getShadowPiece = (): Piece | null => {
+  const shadowPiece = useMemo(() => {
     if (!currentPiece) return null;
     let dropY = currentPiece.y;
     while (!checkCollision({ ...currentPiece, y: dropY + 1 })) {
       dropY++;
     }
     return { ...currentPiece, y: dropY };
-  };
+  }, [currentPiece, checkCollision]);
 
   return {
     board,
     currentPiece,
     nextPiece,
     heldPiece,
-    shadowPiece: getShadowPiece(),
+    shadowPiece,
     isGameOver,
     isPaused,
     speed,
