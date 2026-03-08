@@ -102,6 +102,17 @@ export const useTetris = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [speed, setSpeed] = useState(5); // 1-10
+  const [clearingLines, setClearingLines] = useState<number[]>([]);
+  const clearLinesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (clearLinesTimeoutRef.current) {
+        clearTimeout(clearLinesTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Calculate fall speed interval based on speed setting (1 = slowest, 10 = fastest)
   // 1: 1000ms, 10: 100ms
@@ -142,44 +153,73 @@ export const useTetris = () => {
   }, [board]);
 
   const commitPieceToBoard = useCallback((piece: Piece, dropY: number) => {
-     setBoard(prev => {
-         const newBoard = prev.map(row => [...row]);
-         let gameOver = false;
+     let isGameOverNow = false;
+     let linesToClear: number[] = [];
 
-         piece.shape.forEach((row, y) => {
-             row.forEach((val, x) => {
-                 if (val) {
-                     const boardY = dropY + y;
-                     if (boardY < 0 || (boardY >= 0 && boardY < BOARD_HEIGHT && prev[boardY][piece.x + x] !== 0)) {
-                         gameOver = true;
-                     } else if (boardY < BOARD_HEIGHT) {
-                         newBoard[boardY][piece.x + x] = piece.color;
-                     }
+     // Compute the new board before setting state
+     const newBoard = board.map(row => [...row]);
+     let gameOver = false;
+
+     piece.shape.forEach((row, y) => {
+         row.forEach((val, x) => {
+             if (val) {
+                 const boardY = dropY + y;
+                 if (boardY < 0 || (boardY >= 0 && boardY < BOARD_HEIGHT && board[boardY][piece.x + x] !== 0)) {
+                     gameOver = true;
+                 } else if (boardY < BOARD_HEIGHT) {
+                     newBoard[boardY][piece.x + x] = piece.color;
                  }
-             });
+             }
          });
-
-         if (gameOver) {
-             setIsGameOver(true);
-             return prev;
-         }
-
-         const filteredBoard = newBoard.filter(row => row.some(cell => cell === 0));
-         const linesCleared = BOARD_HEIGHT - filteredBoard.length;
-         const emptyLines = Array.from({ length: linesCleared }, () => Array(BOARD_WIDTH).fill(0));
-         return [...emptyLines, ...filteredBoard];
      });
 
-     setCurrentPiece(nextPiece);
-     setNextPiece(getRandomPiece());
-     setCanHold(true);
-  }, [nextPiece]);
+     isGameOverNow = gameOver;
 
-  // Lock piece and clear lines
-  const lockPiece = useCallback(() => {
-    if (!currentPiece) return;
-    commitPieceToBoard(currentPiece, currentPiece.y);
-  }, [currentPiece, commitPieceToBoard]);
+     if (isGameOverNow) {
+         setIsGameOver(true);
+         // Still update board so the last piece shows up
+         setBoard(newBoard);
+         return;
+     }
+
+     // Find full lines before filtering
+     linesToClear = newBoard.reduce((acc, row, idx) => {
+         if (row.every(cell => cell !== 0)) {
+             acc.push(idx);
+         }
+         return acc;
+     }, [] as number[]);
+
+     // Set the board with the locked piece, lines not cleared yet
+     setBoard(newBoard);
+
+     if (linesToClear.length > 0) {
+         setClearingLines(linesToClear);
+         setCurrentPiece(null); // Pause interaction and falling
+
+         if (clearLinesTimeoutRef.current) {
+             clearTimeout(clearLinesTimeoutRef.current);
+         }
+
+         clearLinesTimeoutRef.current = setTimeout(() => {
+             setBoard(prevBoard => {
+                 const filteredBoard = prevBoard.filter((_, idx) => !linesToClear.includes(idx));
+                 const emptyLines = Array.from({ length: linesToClear.length }, () => Array(BOARD_WIDTH).fill(0));
+                 return [...emptyLines, ...filteredBoard];
+             });
+
+             setClearingLines([]);
+             setCurrentPiece(nextPiece);
+             setNextPiece(getRandomPiece());
+             setCanHold(true);
+             clearLinesTimeoutRef.current = null;
+         }, 400); // 400ms flash duration
+     } else {
+         setCurrentPiece(nextPiece);
+         setNextPiece(getRandomPiece());
+         setCanHold(true);
+     }
+  }, [board, nextPiece]);
 
   // Move piece down
   const currentPieceRef = useRef<Piece | null>(currentPiece);
@@ -297,6 +337,11 @@ export const useTetris = () => {
   }, [currentPiece, heldPiece, nextPiece, isGameOver, isPaused, canHold]);
 
   const resetGame = useCallback(() => {
+    if (clearLinesTimeoutRef.current) {
+      clearTimeout(clearLinesTimeoutRef.current);
+      clearLinesTimeoutRef.current = null;
+    }
+    setClearingLines([]);
     setBoard(createEmptyBoard());
     setCurrentPiece(getRandomPiece());
     setNextPiece(getRandomPiece());
@@ -329,6 +374,7 @@ export const useTetris = () => {
     isGameOver,
     isPaused,
     speed,
+    clearingLines,
     moveLeft,
     moveRight,
     moveDown,

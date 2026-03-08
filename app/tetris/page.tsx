@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useTetris } from "./useTetris";
-import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDownToLine, Settings, Archive, ArrowDown } from "lucide-react";
+import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDown } from "lucide-react";
 
 export default function TetrisPage() {
   const {
@@ -20,10 +20,27 @@ export default function TetrisPage() {
     holdPiece,
     resetGame,
     speed,
+    clearingLines,
     setSpeed,
     isPaused,
     togglePause,
   } = useTetris();
+
+  const [blink, setBlink] = useState(false);
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+    if (clearingLines.length > 0) {
+      interval = setInterval(() => {
+        setBlink(prev => !prev);
+      }, 70); // fast flash
+    } else {
+      setBlink(false);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [clearingLines]);
 
   // Hold-to-repeat for movement (buttons and arrow keys)
   const REPEAT_DELAY = 200;
@@ -154,7 +171,12 @@ export default function TetrisPage() {
       row.some((val, dx) => val && shadowPiece.y + dy === y && shadowPiece.x + dx === x)
     );
 
-    if (isCurrentPiece) {
+    const isClearing = clearingLines.includes(y);
+
+    if (isClearing && blink) {
+      bgColor = "bg-zinc-100";
+      borderColor = "border-zinc-300";
+    } else if (isCurrentPiece) {
       bgColor = currentPiece!.color;
       borderColor = "border-white/20";
     } else if (isShadow) {
