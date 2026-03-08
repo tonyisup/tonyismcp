@@ -41,20 +41,22 @@ export default function TetrisPage() {
     }
   }, []);
 
-  const startRepeat = useCallback((action: () => void) => {
-    if (isGameOver || isPaused) return;
-    clearRepeat();
-    action();
-    repeatRef.current.timeout = setTimeout(() => {
-      repeatRef.current.timeout = null;
-      repeatRef.current.interval = setInterval(action, REPEAT_INTERVAL);
-    }, REPEAT_DELAY);
-  }, [isGameOver, isPaused, clearRepeat]);
-
   // Refs for touch handlers that need passive: false (React can't set that, so we attach manually)
   const controlsRef = useRef<HTMLDivElement>(null);
   const actionsRef = useRef({ moveLeft, moveRight, moveDown });
   actionsRef.current = { moveLeft, moveRight, moveDown };
+
+  const startRepeat = useCallback((actionKey: "moveLeft" | "moveRight" | "moveDown") => {
+    if (isGameOver || isPaused) return;
+    clearRepeat();
+    actionsRef.current[actionKey]();
+    repeatRef.current.timeout = setTimeout(() => {
+      repeatRef.current.timeout = null;
+      repeatRef.current.interval = setInterval(() => {
+        actionsRef.current[actionKey]();
+      }, REPEAT_INTERVAL);
+    }, REPEAT_DELAY);
+  }, [isGameOver, isPaused, clearRepeat]);
 
   useEffect(() => {
     const el = controlsRef.current;
@@ -66,10 +68,8 @@ export default function TetrisPage() {
       const move = (moveEl as HTMLElement).dataset.move;
       const key = move === "left" ? "moveLeft" : move === "right" ? "moveRight" : move === "down" ? "moveDown" : null;
       if (!key) return;
-      const action = actionsRef.current[key];
-      if (!action) return;
       e.preventDefault(); // only works with passive: false
-      startRepeat(action);
+      startRepeat(key as "moveLeft" | "moveRight" | "moveDown");
     };
 
     const handleTouchEnd = () => clearRepeat();
@@ -93,15 +93,15 @@ export default function TetrisPage() {
       switch (e.key) {
         case "ArrowLeft":
           e.preventDefault();
-          startRepeat(moveLeft);
+          startRepeat("moveLeft");
           break;
         case "ArrowRight":
           e.preventDefault();
-          startRepeat(moveRight);
+          startRepeat("moveRight");
           break;
         case "ArrowDown":
           e.preventDefault();
-          startRepeat(moveDown);
+          startRepeat("moveDown");
           break;
         case "ArrowUp":
         case "x":
@@ -130,9 +130,13 @@ export default function TetrisPage() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
-      clearRepeat();
     };
   }, [moveLeft, moveRight, moveDown, rotate, hardDrop, holdPiece, isGameOver, isPaused, startRepeat, clearRepeat]);
+
+  // Clean up repeat on unmount
+  useEffect(() => {
+    return () => clearRepeat();
+  }, [clearRepeat]);
 
   // Render board cell
   const renderCell = (value: number | string, x: number, y: number) => {
@@ -376,7 +380,7 @@ export default function TetrisPage() {
           role="button"
           tabIndex={0}
           aria-label="Move Left"
-          onMouseDown={() => startRepeat(moveLeft)}
+          onMouseDown={() => startRepeat("moveLeft")}
           onMouseUp={clearRepeat}
           onMouseLeave={clearRepeat}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
@@ -388,7 +392,7 @@ export default function TetrisPage() {
           role="button"
           tabIndex={0}
           aria-label="Move Right"
-          onMouseDown={() => startRepeat(moveRight)}
+          onMouseDown={() => startRepeat("moveRight")}
           onMouseUp={clearRepeat}
           onMouseLeave={clearRepeat}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
@@ -408,7 +412,7 @@ export default function TetrisPage() {
           role="button"
           tabIndex={0}
           aria-label="Move Down"
-          onMouseDown={() => startRepeat(moveDown)}
+          onMouseDown={() => startRepeat("moveDown")}
           onMouseUp={clearRepeat}
           onMouseLeave={clearRepeat}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
