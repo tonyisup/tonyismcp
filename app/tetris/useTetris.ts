@@ -122,11 +122,11 @@ export const useTetris = () => {
 
   // Initialize game
   useEffect(() => {
-    if (!currentPiece && !isGameOver) {
+    if (!currentPiece && !isGameOver && clearingLines.length === 0) {
       setCurrentPiece(getRandomPiece());
       setNextPiece(getRandomPiece());
     }
-  }, [currentPiece, isGameOver]);
+  }, [currentPiece, isGameOver, clearingLines.length]);
 
   // Collision detection
   const checkCollision = useCallback((piece: Piece, targetBoard: Grid = board): boolean => {

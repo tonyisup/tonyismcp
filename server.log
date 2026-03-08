@@ -1,0 +1,14 @@
+
+> tonyismcp@0.1.0 dev
+> next dev --turbopack --port 3001
+
+   ▲ Next.js 15.5.7 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.0.2:3001
+
+ ✓ Starting...
+ ✓ Ready in 1464ms
+ ○ Compiling /tetris ...
+ ✓ Compiled /tetris in 7.2s
+ GET /tetris 200 in 8365ms
+ GET /tetris 200 in 220ms
