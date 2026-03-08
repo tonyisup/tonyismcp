@@ -329,7 +329,8 @@ export default function TetrisPage() {
       </div>
 
       {/* Mobile Controls Bottom - movement uses divs so touch hold-to-repeat isn't overridden by button behavior */}
-      <div className="mt-4 md:mt-8 flex justify-between gap-2 w-full max-w-md px-0 md:px-2">
+      <div
+        className="user-select-none mt-4 md:mt-8 flex justify-between gap-2 w-full max-w-md px-0 md:px-2">
         <div
           role="button"
           tabIndex={0}
@@ -337,7 +338,7 @@ export default function TetrisPage() {
           onTouchStart={(e) => { e.preventDefault(); startRepeat(moveLeft); }}
           onTouchEnd={clearRepeat}
           onTouchCancel={clearRepeat}
-          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
+          className="user-select-none bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowLeft size={24} />
         </div>
