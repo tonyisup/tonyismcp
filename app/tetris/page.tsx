@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useTetris } from "./useTetris";
-import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDownToLine, Settings, Archive } from "lucide-react";
+import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDownToLine, Settings, Archive, ArrowDown } from "lucide-react";
 
 export default function TetrisPage() {
   const {
@@ -25,20 +25,49 @@ export default function TetrisPage() {
     togglePause,
   } = useTetris();
 
-  // Handle keyboard controls
+  // Hold-to-repeat for movement (buttons and arrow keys)
+  const REPEAT_DELAY = 400;
+  const REPEAT_INTERVAL = 100;
+  const repeatRef = useRef<{ timeout: ReturnType<typeof setTimeout> | null; interval: ReturnType<typeof setInterval> | null }>({ timeout: null, interval: null });
+
+  const clearRepeat = useCallback(() => {
+    if (repeatRef.current.timeout) {
+      clearTimeout(repeatRef.current.timeout);
+      repeatRef.current.timeout = null;
+    }
+    if (repeatRef.current.interval) {
+      clearInterval(repeatRef.current.interval);
+      repeatRef.current.interval = null;
+    }
+  }, []);
+
+  const startRepeat = useCallback((action: () => void) => {
+    if (isGameOver || isPaused) return;
+    clearRepeat();
+    action();
+    repeatRef.current.timeout = setTimeout(() => {
+      repeatRef.current.timeout = null;
+      repeatRef.current.interval = setInterval(action, REPEAT_INTERVAL);
+    }, REPEAT_DELAY);
+  }, [isGameOver, isPaused, clearRepeat]);
+
+  // Handle keyboard controls (with hold-to-repeat for arrows)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isGameOver || isPaused) return;
 
       switch (e.key) {
         case "ArrowLeft":
-          moveLeft();
+          e.preventDefault();
+          startRepeat(moveLeft);
           break;
         case "ArrowRight":
-          moveRight();
+          e.preventDefault();
+          startRepeat(moveRight);
           break;
         case "ArrowDown":
-          moveDown();
+          e.preventDefault();
+          startRepeat(moveDown);
           break;
         case "ArrowUp":
         case "x":
@@ -56,9 +85,20 @@ export default function TetrisPage() {
       }
     };
 
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "ArrowDown") {
+        clearRepeat();
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [moveLeft, moveRight, moveDown, rotate, hardDrop, holdPiece, isGameOver, isPaused]);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      clearRepeat();
+    };
+  }, [moveLeft, moveRight, moveDown, rotate, hardDrop, holdPiece, isGameOver, isPaused, startRepeat, clearRepeat]);
 
   // Render board cell
   const renderCell = (value: number | string, x: number, y: number) => {
@@ -97,12 +137,12 @@ export default function TetrisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-mono flex flex-col items-center py-8 px-4 selection:bg-zinc-800">
-      <div className="max-w-md w-full mb-6 text-center">
-        <h1 className="text-3xl font-bold tracking-widest text-zinc-100 uppercase mb-2">Relaxed Tetris</h1>
-        <p className="text-sm text-zinc-500 mb-4">No Score. No Levels. Just Blocks.</p>
+    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-mono flex flex-col items-center py-4 px-3 md:py-8 md:px-4 selection:bg-zinc-800">
+      <div className="max-w-md w-full mb-3 md:mb-6 text-center">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-widest text-zinc-100 uppercase mb-1 md:mb-2">Relaxed Tetris</h1>
+        <p className="text-xs md:text-sm text-zinc-500 mb-2 md:mb-4">No Score. No Levels. Just Blocks.</p>
 
-        <div className="flex justify-between items-center bg-zinc-900 p-3 rounded-lg border border-zinc-800">
+        <div className="flex justify-between items-center bg-zinc-900 p-2 md:p-3 rounded-lg border border-zinc-800">
           <div className="flex items-center gap-2">
             <span className="text-xs uppercase text-zinc-500">Speed:</span>
             <input
@@ -124,9 +164,9 @@ export default function TetrisPage() {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center md:items-start justify-center w-full max-w-2xl">
+      <div className="flex flex-col md:flex-row gap-2 md:gap-8 items-center md:items-start justify-center w-full max-w-2xl">
         {/* Mobile Top Controls (Next/Hold) - only visible on small screens */}
-        <div className="flex md:hidden w-full max-w-full justify-between mt-4 px-2">
+        <div className="flex md:hidden w-full max-w-full justify-between mt-1 px-0">
           <div className="flex flex-col gap-1 w-20 z-10">
             <div className="text-[10px] text-center uppercase text-zinc-600 font-bold">Stash</div>
             <button
@@ -214,14 +254,12 @@ export default function TetrisPage() {
         </div>
 
         {/* Main Board */}
-        <div className="relative mt-2 md:mt-0">
-          <div className="bg-zinc-900 border-4 border-zinc-800 p-1 rounded-sm shadow-2xl">
+        <div className="relative mt-1 md:mt-0 w-full flex justify-center">
+          <div className="bg-zinc-900 border-2 md:border-4 border-zinc-800 p-1 rounded-sm shadow-2xl">
             <div
-              className="grid bg-zinc-950"
+              className="grid bg-zinc-950 w-[min(94vw,340px)] h-[min(58vh,520px)] md:w-[min(80vw,300px)] md:h-[min(160vw,600px)]"
               style={{
                 gridTemplateColumns: `repeat(${board[0].length}, 1fr)`,
-                width: 'min(80vw, 300px)',
-                height: 'min(160vw, 600px)',
                 gap: '1px'
               }}
             >
@@ -291,14 +329,36 @@ export default function TetrisPage() {
       </div>
 
       {/* Mobile Controls Bottom */}
-      <div className="mt-8 flex justify-between gap-2 w-full max-w-md px-2">
+      <div className="mt-4 md:mt-8 flex justify-between gap-2 w-full max-w-md px-0 md:px-2">
         <button
           type="button"
-          onClick={moveLeft}
+          onMouseDown={() => startRepeat(moveLeft)}
+          onMouseUp={clearRepeat}
+          onMouseLeave={clearRepeat}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
           aria-label="Move Left"
         >
           <ArrowLeft size={24} />
+        </button>
+        <button
+          type="button"
+          onMouseDown={() => startRepeat(moveRight)}
+          onMouseUp={clearRepeat}
+          onMouseLeave={clearRepeat}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
+          aria-label="Move Right"
+        >
+          <ArrowRight size={24} />
+        </button>
+        <button
+          type="button"
+          onMouseDown={() => startRepeat(moveDown)}
+          onMouseUp={clearRepeat}
+          onMouseLeave={clearRepeat}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
+          aria-label="Move Down"
+        >
+          <ArrowDown size={24} />
         </button>
         <button
           type="button"
@@ -307,22 +367,6 @@ export default function TetrisPage() {
           aria-label="Rotate"
         >
           <RotateCw size={24} />
-        </button>
-        <button
-          type="button"
-          onClick={hardDrop}
-          className="bg-zinc-200 text-zinc-900 hover:bg-white active:bg-zinc-300 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-400 active:border-b-0 active:translate-y-1"
-          aria-label="Hard Drop"
-        >
-          <ArrowDownToLine size={24} />
-        </button>
-        <button
-          type="button"
-          onClick={moveRight}
-          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
-          aria-label="Move Right"
-        >
-          <ArrowRight size={24} />
         </button>
       </div>
 
