@@ -51,6 +51,40 @@ export default function TetrisPage() {
     }, REPEAT_DELAY);
   }, [isGameOver, isPaused, clearRepeat]);
 
+  // Refs for touch handlers that need passive: false (React can't set that, so we attach manually)
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef({ moveLeft, moveRight, moveDown });
+  actionsRef.current = { moveLeft, moveRight, moveDown };
+
+  useEffect(() => {
+    const el = controlsRef.current;
+    if (!el) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const moveEl = (e.target as Element).closest("[data-move]");
+      if (!moveEl) return;
+      const move = (moveEl as HTMLElement).dataset.move;
+      const key = move === "left" ? "moveLeft" : move === "right" ? "moveRight" : move === "down" ? "moveDown" : null;
+      if (!key) return;
+      const action = actionsRef.current[key];
+      if (!action) return;
+      e.preventDefault(); // only works with passive: false
+      startRepeat(action);
+    };
+
+    const handleTouchEnd = () => clearRepeat();
+    const handleTouchCancel = () => clearRepeat();
+
+    el.addEventListener("touchstart", handleTouchStart, { passive: false });
+    el.addEventListener("touchend", handleTouchEnd, { passive: false });
+    el.addEventListener("touchcancel", handleTouchCancel, { passive: false });
+    return () => {
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchend", handleTouchEnd);
+      el.removeEventListener("touchcancel", handleTouchCancel);
+    };
+  }, [startRepeat, clearRepeat]);
+
   // Handle keyboard controls (with hold-to-repeat for arrows)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -328,38 +362,50 @@ export default function TetrisPage() {
         </div>
       </div>
 
-      {/* Mobile Controls Bottom - movement uses divs so touch hold-to-repeat isn't overridden by button behavior */}
+      {/* Mobile Controls Bottom - touch uses passive: false so preventDefault stops long-press haptics */}
       <div
-        className="user-select-none mt-4 md:mt-8 flex justify-between gap-2 w-full max-w-md px-0 md:px-2">
+        ref={controlsRef}
+        role="group"
+        aria-label="Movement controls"
+        onContextMenu={(e) => e.preventDefault()}
+        className="select-none touch-none mt-4 md:mt-8 flex justify-between gap-2 w-full max-w-md px-0 md:px-2"
+        style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
+      >
         <div
+          data-move="left"
           role="button"
           tabIndex={0}
           aria-label="Move Left"
-          onTouchStart={(e) => { e.preventDefault(); startRepeat(moveLeft); }}
-          onTouchEnd={clearRepeat}
-          onTouchCancel={clearRepeat}
-          className="user-select-none bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
+          onMouseDown={() => startRepeat(moveLeft)}
+          onMouseUp={clearRepeat}
+          onMouseLeave={clearRepeat}
+          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveLeft(); } }}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowLeft size={24} />
         </div>
         <div
+          data-move="right"
           role="button"
           tabIndex={0}
           aria-label="Move Right"
-          onTouchStart={(e) => { e.preventDefault(); startRepeat(moveRight); }}
-          onTouchEnd={clearRepeat}
-          onTouchCancel={clearRepeat}
+          onMouseDown={() => startRepeat(moveRight)}
+          onMouseUp={clearRepeat}
+          onMouseLeave={clearRepeat}
+          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveRight(); } }}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowRight size={24} />
         </div>
         <div
+          data-move="down"
           role="button"
           tabIndex={0}
           aria-label="Move Down"
-          onTouchStart={(e) => { e.preventDefault(); startRepeat(moveDown); }}
-          onTouchEnd={clearRepeat}
-          onTouchCancel={clearRepeat}
+          onMouseDown={() => startRepeat(moveDown)}
+          onMouseUp={clearRepeat}
+          onMouseLeave={clearRepeat}
+          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveDown(); } }}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowDown size={24} />
