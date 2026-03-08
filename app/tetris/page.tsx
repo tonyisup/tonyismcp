@@ -328,38 +328,53 @@ export default function TetrisPage() {
         </div>
       </div>
 
-      {/* Mobile Controls Bottom */}
+      {/* Mobile Controls Bottom - movement uses divs so touch hold-to-repeat isn't overridden by button behavior */}
       <div className="mt-4 md:mt-8 flex justify-between gap-2 w-full max-w-md px-0 md:px-2">
-        <button
-          type="button"
-          onTouchStart={() => startRepeat(moveLeft)}
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Move Left"
+          onTouchStart={(e) => { e.preventDefault(); startRepeat(moveLeft); }}
           onTouchEnd={clearRepeat}
           onTouchCancel={clearRepeat}
-          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
-          aria-label="Move Left"
+          onMouseDown={() => startRepeat(moveLeft)}
+          onMouseUp={clearRepeat}
+          onMouseLeave={clearRepeat}
+          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveLeft(); } }}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowLeft size={24} />
-        </button>
-        <button
-          type="button"
-          onTouchStart={() => startRepeat(moveRight)}
+        </div>
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Move Right"
+          onTouchStart={(e) => { e.preventDefault(); startRepeat(moveRight); }}
           onTouchEnd={clearRepeat}
           onTouchCancel={clearRepeat}
-          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
-          aria-label="Move Right"
+          onMouseDown={() => startRepeat(moveRight)}
+          onMouseUp={clearRepeat}
+          onMouseLeave={clearRepeat}
+          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveRight(); } }}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowRight size={24} />
-        </button>
-        <button
-          type="button"
-          onTouchStart={() => startRepeat(moveDown)}
+        </div>
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Move Down"
+          onTouchStart={(e) => { e.preventDefault(); startRepeat(moveDown); }}
           onTouchEnd={clearRepeat}
           onTouchCancel={clearRepeat}
-          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
-          aria-label="Move Down"
+          onMouseDown={() => startRepeat(moveDown)}
+          onMouseUp={clearRepeat}
+          onMouseLeave={clearRepeat}
+          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveDown(); } }}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowDown size={24} />
-        </button>
+        </div>
         <button
           type="button"
           onClick={rotate}
