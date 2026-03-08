@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useTetris } from "./useTetris";
-import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDownToLine, Settings } from "lucide-react";
+import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDownToLine, Settings, Archive } from "lucide-react";
 
 export default function TetrisPage() {
   const {
@@ -129,10 +129,15 @@ export default function TetrisPage() {
         <div className="flex md:hidden w-full max-w-full justify-between mt-4 px-2">
           <div className="flex flex-col gap-1 w-20 z-10">
             <div className="text-[10px] text-center uppercase text-zinc-600 font-bold">Stash</div>
-            <div className="bg-zinc-900 border border-zinc-800 h-16 w-16 mx-auto grid place-items-center rounded shadow-md">
+            <button
+              type="button"
+              onClick={() => { if (!isGameOver && !isPaused) holdPiece(); }}
+              className="bg-zinc-900 border border-zinc-800 h-16 w-16 mx-auto grid place-items-center rounded shadow-md cursor-pointer hover:bg-zinc-800 active:bg-zinc-700 transition-colors touch-manipulation"
+              aria-label="Stash piece"
+            >
               {heldPiece && (
                 <div
-                  className="grid"
+                  className="grid pointer-events-none"
                   style={{
                     gridTemplateColumns: `repeat(${heldPiece.shape[0].length}, 1fr)`,
                     width: `${heldPiece.shape[0].length * 10}px`,
@@ -149,7 +154,7 @@ export default function TetrisPage() {
                   )}
                 </div>
               )}
-            </div>
+            </button>
           </div>
           <div className="flex flex-col gap-1 w-20 z-10">
             <div className="text-[10px] text-center uppercase text-zinc-600 font-bold">Next</div>
@@ -180,10 +185,15 @@ export default function TetrisPage() {
         {/* Left column - Hold */}
         <div className="hidden md:flex flex-col gap-2 w-24">
           <div className="text-xs text-center uppercase tracking-widest text-zinc-500 font-bold">Stash</div>
-          <div className="bg-zinc-900 border-2 border-zinc-800 w-24 h-24 p-2 grid place-items-center rounded-lg">
+          <button
+            type="button"
+            onClick={() => { if (!isGameOver && !isPaused) holdPiece(); }}
+            className="bg-zinc-900 border-2 border-zinc-800 w-24 h-24 p-2 grid place-items-center rounded-lg cursor-pointer hover:bg-zinc-800 transition-colors"
+            aria-label="Stash piece"
+          >
             {heldPiece && (
               <div
-                className="grid"
+                className="grid pointer-events-none"
                 style={{
                   gridTemplateColumns: `repeat(${heldPiece.shape[0].length}, 1fr)`,
                   width: `${heldPiece.shape[0].length * 16}px`,
@@ -200,7 +210,7 @@ export default function TetrisPage() {
                 )}
               </div>
             )}
-          </div>
+          </button>
         </div>
 
         {/* Main Board */}
@@ -281,7 +291,7 @@ export default function TetrisPage() {
       </div>
 
       {/* Mobile Controls Bottom */}
-      <div className="mt-8 grid grid-cols-5 gap-2 w-full max-w-[350px] md:max-w-md px-2">
+      <div className="mt-8 flex justify-between gap-2 w-full max-w-md px-2">
         <button
           type="button"
           onClick={moveLeft}
@@ -313,15 +323,6 @@ export default function TetrisPage() {
           aria-label="Move Right"
         >
           <ArrowRight size={24} />
-        </button>
-        <button
-          type="button"
-          onClick={holdPiece}
-          className="relative flex-col bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
-          aria-label="Stash"
-        >
-          <Settings size={20} className="mb-1" /> {/* Using Settings as a stash icon, or could use another */}
-          <span className="text-[10px] font-bold mt-1">STASH</span>
         </button>
       </div>
 
