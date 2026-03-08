@@ -1,0 +1,342 @@
+"use client";
+
+import { useEffect } from "react";
+import { useTetris } from "./useTetris";
+import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDownToLine, Settings } from "lucide-react";
+
+export default function TetrisPage() {
+  const {
+    board,
+    currentPiece,
+    nextPiece,
+    heldPiece,
+    shadowPiece,
+    isGameOver,
+    moveLeft,
+    moveRight,
+    moveDown,
+    hardDrop,
+    rotate,
+    holdPiece,
+    resetGame,
+    speed,
+    setSpeed,
+    isPaused,
+    togglePause,
+  } = useTetris();
+
+  // Handle keyboard controls
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isGameOver || isPaused) return;
+
+      switch (e.key) {
+        case "ArrowLeft":
+          moveLeft();
+          break;
+        case "ArrowRight":
+          moveRight();
+          break;
+        case "ArrowDown":
+          moveDown();
+          break;
+        case "ArrowUp":
+        case "x":
+          rotate();
+          break;
+        case " ":
+          e.preventDefault(); // Prevent scrolling
+          hardDrop();
+          break;
+        case "Shift":
+        case "c":
+        case "C":
+          holdPiece();
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [moveLeft, moveRight, moveDown, rotate, hardDrop, holdPiece, isGameOver, isPaused]);
+
+  // Render board cell
+  const renderCell = (value: number | string, x: number, y: number) => {
+    // Determine cell color
+    let bgColor = "bg-zinc-800"; // Empty
+    let borderColor = "border-zinc-900";
+
+    // Check if cell is part of current piece
+    const isCurrentPiece = currentPiece?.shape.some((row, dy) =>
+      row.some((val, dx) => val && currentPiece.y + dy === y && currentPiece.x + dx === x)
+    );
+
+    // Check if cell is part of shadow
+    const isShadow = !isCurrentPiece && shadowPiece?.shape.some((row, dy) =>
+      row.some((val, dx) => val && shadowPiece.y + dy === y && shadowPiece.x + dx === x)
+    );
+
+    if (isCurrentPiece) {
+      bgColor = currentPiece!.color;
+      borderColor = "border-white/20";
+    } else if (isShadow) {
+      bgColor = "bg-zinc-700/50";
+      borderColor = "border-white/10";
+    } else if (value) {
+      // It's a locked block
+      bgColor = value as string;
+      borderColor = "border-black/30";
+    }
+
+    return (
+      <div
+        key={`${x}-${y}`}
+        className={`w-full h-full border ${borderColor} ${bgColor} ${isCurrentPiece || value ? 'shadow-[inset_2px_2px_rgba(255,255,255,0.2),inset_-2px_-2px_rgba(0,0,0,0.2)]' : ''}`}
+      />
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-mono flex flex-col items-center py-8 px-4 selection:bg-zinc-800">
+      <div className="max-w-md w-full mb-6 text-center">
+        <h1 className="text-3xl font-bold tracking-widest text-zinc-100 uppercase mb-2">Relaxed Tetris</h1>
+        <p className="text-sm text-zinc-500 mb-4">No Score. No Levels. Just Blocks.</p>
+
+        <div className="flex justify-between items-center bg-zinc-900 p-3 rounded-lg border border-zinc-800">
+          <div className="flex items-center gap-2">
+            <span className="text-xs uppercase text-zinc-500">Speed:</span>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={speed}
+              onChange={(e) => setSpeed(parseInt(e.target.value))}
+              className="w-24 accent-zinc-500"
+            />
+          </div>
+          <button
+            onClick={togglePause}
+            className="p-2 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors"
+          >
+            {isPaused ? <Play size={16} /> : <Pause size={16} />}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center md:items-start justify-center w-full max-w-2xl">
+        {/* Mobile Top Controls (Next/Hold) - only visible on small screens */}
+        <div className="flex md:hidden w-full max-w-full justify-between mt-4 px-2">
+          <div className="flex flex-col gap-1 w-20 z-10">
+            <div className="text-[10px] text-center uppercase text-zinc-600 font-bold">Stash</div>
+            <div className="bg-zinc-900 border border-zinc-800 h-16 w-16 mx-auto grid place-items-center rounded shadow-md">
+              {heldPiece && (
+                <div
+                  className="grid"
+                  style={{
+                    gridTemplateColumns: `repeat(${heldPiece.shape[0].length}, 1fr)`,
+                    width: `${heldPiece.shape[0].length * 10}px`,
+                    gap: '1px'
+                  }}
+                >
+                  {heldPiece.shape.map((row, y) =>
+                    row.map((val, x) => (
+                      <div
+                        key={`${x}-${y}`}
+                        className={`w-2.5 h-2.5 ${val ? heldPiece.color : 'bg-transparent'}`}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1 w-20 z-10">
+            <div className="text-[10px] text-center uppercase text-zinc-600 font-bold">Next</div>
+            <div className="bg-zinc-900 border border-zinc-800 h-16 w-16 mx-auto grid place-items-center rounded shadow-md">
+              {nextPiece && (
+                <div
+                  className="grid"
+                  style={{
+                    gridTemplateColumns: `repeat(${nextPiece.shape[0].length}, 1fr)`,
+                    width: `${nextPiece.shape[0].length * 10}px`,
+                    gap: '1px'
+                  }}
+                >
+                  {nextPiece.shape.map((row, y) =>
+                    row.map((val, x) => (
+                      <div
+                        key={`${x}-${y}`}
+                        className={`w-2.5 h-2.5 ${val ? nextPiece.color : 'bg-transparent'}`}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Left column - Hold */}
+        <div className="hidden md:flex flex-col gap-2 w-24">
+          <div className="text-xs text-center uppercase tracking-widest text-zinc-500 font-bold">Stash</div>
+          <div className="bg-zinc-900 border-2 border-zinc-800 w-24 h-24 p-2 grid place-items-center rounded-lg">
+            {heldPiece && (
+              <div
+                className="grid"
+                style={{
+                  gridTemplateColumns: `repeat(${heldPiece.shape[0].length}, 1fr)`,
+                  width: `${heldPiece.shape[0].length * 16}px`,
+                  gap: '1px'
+                }}
+              >
+                {heldPiece.shape.map((row, y) =>
+                  row.map((val, x) => (
+                    <div
+                      key={`${x}-${y}`}
+                      className={`w-4 h-4 ${val ? `${heldPiece.color} shadow-[inset_1px_1px_rgba(255,255,255,0.2),inset_-1px_-1px_rgba(0,0,0,0.2)]` : 'bg-transparent'}`}
+                    />
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Board */}
+        <div className="relative mt-2 md:mt-0">
+          <div className="bg-zinc-900 border-4 border-zinc-800 p-1 rounded-sm shadow-2xl">
+            <div
+              className="grid bg-zinc-950"
+              style={{
+                gridTemplateColumns: `repeat(${board[0].length}, 1fr)`,
+                width: 'min(80vw, 300px)',
+                height: 'min(160vw, 600px)',
+                gap: '1px'
+              }}
+            >
+              {board.map((row, y) =>
+                row.map((val, x) => renderCell(val, x, y))
+              )}
+            </div>
+          </div>
+
+          {/* Game Over Overlay */}
+          {isGameOver && (
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center rounded-sm z-10 border-4 border-transparent">
+              <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-lg shadow-2xl">
+                <h2 className="text-2xl font-bold text-zinc-100 mb-2">Board Full</h2>
+                <p className="text-zinc-400 mb-6 text-sm">Take a breath. Ready to go again?</p>
+                <button
+                  onClick={resetGame}
+                  className="px-6 py-3 bg-zinc-200 text-zinc-900 font-bold rounded hover:bg-white transition-colors uppercase tracking-wider text-sm w-full"
+                >
+                  Restart
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Paused Overlay */}
+          {isPaused && !isGameOver && (
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center rounded-sm z-10">
+              <h2 className="text-2xl font-bold text-zinc-300 tracking-widest uppercase mb-4">Paused</h2>
+              <button
+                onClick={togglePause}
+                className="px-6 py-2 border-2 border-zinc-500 text-zinc-300 font-bold rounded hover:bg-zinc-800 transition-colors uppercase text-sm"
+              >
+                Resume
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Right column - Next */}
+        <div className="hidden md:flex flex-col gap-2 w-24">
+          <div className="text-xs text-center uppercase tracking-widest text-zinc-500 font-bold">Next</div>
+          <div className="bg-zinc-900 border-2 border-zinc-800 w-24 h-24 p-2 grid place-items-center rounded-lg">
+            {nextPiece && (
+              <div
+                className="grid"
+                style={{
+                  gridTemplateColumns: `repeat(${nextPiece.shape[0].length}, 1fr)`,
+                  width: `${nextPiece.shape[0].length * 16}px`,
+                  gap: '1px'
+                }}
+              >
+                {nextPiece.shape.map((row, y) =>
+                  row.map((val, x) => (
+                    <div
+                      key={`${x}-${y}`}
+                      className={`w-4 h-4 ${val ? `${nextPiece.color} shadow-[inset_1px_1px_rgba(255,255,255,0.2),inset_-1px_-1px_rgba(0,0,0,0.2)]` : 'bg-transparent'}`}
+                    />
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Controls Bottom */}
+      <div className="mt-8 grid grid-cols-5 gap-2 w-full max-w-[350px] md:max-w-md px-2">
+        <button
+          onClick={moveLeft}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
+          aria-label="Move Left"
+        >
+          <ArrowLeft size={24} />
+        </button>
+        <button
+          onClick={rotate}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
+          aria-label="Rotate"
+        >
+          <RotateCw size={24} />
+        </button>
+        <button
+          onClick={hardDrop}
+          className="bg-zinc-200 text-zinc-900 hover:bg-white active:bg-zinc-300 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-400 active:border-b-0 active:translate-y-1"
+          aria-label="Hard Drop"
+        >
+          <ArrowDownToLine size={24} />
+        </button>
+        <button
+          onClick={moveRight}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
+          aria-label="Move Right"
+        >
+          <ArrowRight size={24} />
+        </button>
+        <button
+          onClick={holdPiece}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
+          aria-label="Stash"
+        >
+          <Settings size={20} className="mb-1" /> {/* Using Settings as a stash icon, or could use another */}
+          <span className="text-[10px] absolute font-bold mt-5">STASH</span>
+        </button>
+      </div>
+
+      {/* Desktop instructions */}
+      <div className="hidden md:flex gap-6 mt-12 text-xs text-zinc-500">
+        <div className="flex items-center gap-2">
+          <kbd className="bg-zinc-800 px-2 py-1 rounded border border-zinc-700">←</kbd>
+          <kbd className="bg-zinc-800 px-2 py-1 rounded border border-zinc-700">→</kbd>
+          <span>Move</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <kbd className="bg-zinc-800 px-2 py-1 rounded border border-zinc-700">↑</kbd>
+          <span>Rotate</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <kbd className="bg-zinc-800 px-2 py-1 rounded border border-zinc-700">Space</kbd>
+          <span>Drop</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <kbd className="bg-zinc-800 px-2 py-1 rounded border border-zinc-700">C</kbd>
+          <span>Stash</span>
+        </div>
+      </div>
+    </div>
+  );
+}

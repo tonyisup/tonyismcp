@@ -7,15 +7,12 @@
    - Network:      http://192.168.0.2:3001
 
  ✓ Starting...
- ✓ Ready in 1487ms
- ○ Compiling /scratch/scheduler ...
- ✓ Compiled /scratch/scheduler in 4.7s
- GET /scratch/scheduler 200 in 5467ms
- GET /scratch/scheduler 200 in 170ms
- GET /scratch/scheduler 200 in 179ms
- GET /scratch/scheduler 200 in 160ms
- GET /scratch/scheduler 200 in 153ms
- GET /scratch/scheduler 200 in 157ms
- GET /scratch/scheduler 200 in 183ms
- GET /scratch/scheduler 200 in 172ms
- GET /scratch/scheduler 200 in 252ms
+ ✓ Ready in 2s
+ ○ Compiling /tetris ...
+ ✓ Compiled /tetris in 6.7s
+ GET /tetris 200 in 7564ms
+ GET /tetris 200 in 348ms
+ GET /tetris 200 in 309ms
+ GET /tetris 200 in 332ms
+ GET /tetris 200 in 220ms
+ GET /tetris 200 in 191ms
