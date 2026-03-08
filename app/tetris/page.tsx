@@ -26,8 +26,8 @@ export default function TetrisPage() {
   } = useTetris();
 
   // Hold-to-repeat for movement (buttons and arrow keys)
-  const REPEAT_DELAY = 400;
-  const REPEAT_INTERVAL = 100;
+  const REPEAT_DELAY = 200;
+  const REPEAT_INTERVAL = 70;
   const repeatRef = useRef<{ timeout: ReturnType<typeof setTimeout> | null; interval: ReturnType<typeof setInterval> | null }>({ timeout: null, interval: null });
 
   const clearRepeat = useCallback(() => {
@@ -332,9 +332,9 @@ export default function TetrisPage() {
       <div className="mt-4 md:mt-8 flex justify-between gap-2 w-full max-w-md px-0 md:px-2">
         <button
           type="button"
-          onMouseDown={() => startRepeat(moveLeft)}
-          onMouseUp={clearRepeat}
-          onMouseLeave={clearRepeat}
+          onTouchStart={() => startRepeat(moveLeft)}
+          onTouchEnd={clearRepeat}
+          onTouchCancel={clearRepeat}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
           aria-label="Move Left"
         >
@@ -342,9 +342,9 @@ export default function TetrisPage() {
         </button>
         <button
           type="button"
-          onMouseDown={() => startRepeat(moveRight)}
-          onMouseUp={clearRepeat}
-          onMouseLeave={clearRepeat}
+          onTouchStart={() => startRepeat(moveRight)}
+          onTouchEnd={clearRepeat}
+          onTouchCancel={clearRepeat}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
           aria-label="Move Right"
         >
@@ -352,9 +352,9 @@ export default function TetrisPage() {
         </button>
         <button
           type="button"
-          onMouseDown={() => startRepeat(moveDown)}
-          onMouseUp={clearRepeat}
-          onMouseLeave={clearRepeat}
+          onTouchStart={() => startRepeat(moveDown)}
+          onTouchEnd={clearRepeat}
+          onTouchCancel={clearRepeat}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1"
           aria-label="Move Down"
         >

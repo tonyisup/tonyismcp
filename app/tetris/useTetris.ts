@@ -72,7 +72,7 @@ export interface Piece {
 }
 
 const BOARD_WIDTH = 10;
-const BOARD_HEIGHT = 20;
+const BOARD_HEIGHT = 15;
 
 // Helper to create an empty board
 const createEmptyBoard = (): Grid =>
