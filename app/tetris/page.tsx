@@ -337,10 +337,6 @@ export default function TetrisPage() {
           onTouchStart={(e) => { e.preventDefault(); startRepeat(moveLeft); }}
           onTouchEnd={clearRepeat}
           onTouchCancel={clearRepeat}
-          onMouseDown={() => startRepeat(moveLeft)}
-          onMouseUp={clearRepeat}
-          onMouseLeave={clearRepeat}
-          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveLeft(); } }}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowLeft size={24} />
@@ -352,10 +348,6 @@ export default function TetrisPage() {
           onTouchStart={(e) => { e.preventDefault(); startRepeat(moveRight); }}
           onTouchEnd={clearRepeat}
           onTouchCancel={clearRepeat}
-          onMouseDown={() => startRepeat(moveRight)}
-          onMouseUp={clearRepeat}
-          onMouseLeave={clearRepeat}
-          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveRight(); } }}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowRight size={24} />
@@ -367,10 +359,6 @@ export default function TetrisPage() {
           onTouchStart={(e) => { e.preventDefault(); startRepeat(moveDown); }}
           onTouchEnd={clearRepeat}
           onTouchCancel={clearRepeat}
-          onMouseDown={() => startRepeat(moveDown)}
-          onMouseUp={clearRepeat}
-          onMouseLeave={clearRepeat}
-          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveDown(); } }}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowDown size={24} />
