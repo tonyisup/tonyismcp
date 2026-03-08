@@ -379,7 +379,6 @@ export default function TetrisPage() {
           onMouseDown={() => startRepeat(moveLeft)}
           onMouseUp={clearRepeat}
           onMouseLeave={clearRepeat}
-          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveLeft(); } }}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowLeft size={24} />
@@ -392,23 +391,9 @@ export default function TetrisPage() {
           onMouseDown={() => startRepeat(moveRight)}
           onMouseUp={clearRepeat}
           onMouseLeave={clearRepeat}
-          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveRight(); } }}
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowRight size={24} />
-        </div>
-        <div
-          data-move="down"
-          role="button"
-          tabIndex={0}
-          aria-label="Move Down"
-          onMouseDown={() => startRepeat(moveDown)}
-          onMouseUp={clearRepeat}
-          onMouseLeave={clearRepeat}
-          onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); moveDown(); } }}
-          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
-        >
-          <ArrowDown size={24} />
         </div>
         <button
           type="button"
@@ -418,6 +403,18 @@ export default function TetrisPage() {
         >
           <RotateCw size={24} />
         </button>
+        <div
+          data-move="down"
+          role="button"
+          tabIndex={0}
+          aria-label="Move Down"
+          onMouseDown={() => startRepeat(moveDown)}
+          onMouseUp={clearRepeat}
+          onMouseLeave={clearRepeat}
+          className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
+        >
+          <ArrowDown size={24} />
+        </div>
       </div>
 
       {/* Desktop instructions */}
