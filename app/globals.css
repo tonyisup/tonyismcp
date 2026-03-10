@@ -3,6 +3,8 @@
 
 @plugin "tailwindcss-animate";
 
+@custom-variant landscape-short (@media (orientation: landscape) and (max-height: 500px));
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

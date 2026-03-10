@@ -7,8 +7,16 @@
    - Network:      http://192.168.0.2:3001
 
  ✓ Starting...
- ✓ Ready in 1464ms
+ ✓ Ready in 2.6s
  ○ Compiling /tetris ...
- ✓ Compiled /tetris in 7.2s
- GET /tetris 200 in 8365ms
- GET /tetris 200 in 220ms
+ ✓ Compiled /tetris in 8.5s
+ GET /tetris 200 in 9504ms
+ GET /tetris 200 in 267ms
+ GET /tetris 200 in 218ms
+ GET /tetris 200 in 223ms
+ GET /tetris 200 in 377ms
+ GET /tetris 200 in 184ms
+ GET /tetris 200 in 348ms
+ GET /tetris 200 in 206ms
+ GET /tetris 200 in 215ms
+ GET /tetris 200 in 185ms
