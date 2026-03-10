@@ -369,8 +369,8 @@ export default function TetrisPage() {
         </div>
 
         {/* Main Board */}
-        <div className="relative mt-1 md:mt-0 w-full flex justify-center">
-          <div className="bg-zinc-900 border-2 md:border-4 border-zinc-800 p-1 rounded-sm shadow-2xl">
+        <div className="relative mt-1 md:mt-0 w-full flex flex-col items-center justify-center landscape-short:h-full">
+          <div className="bg-zinc-900 border-2 md:border-4 border-zinc-800 p-1 rounded-sm shadow-2xl relative">
             <div
               className="grid bg-zinc-950 w-[min(94vw,340px)] h-[min(58vh,520px)] md:w-[min(80vw,300px)] md:h-[min(160vw,600px)] landscape-short:w-[min(35vw,160px)] landscape-short:h-[min(85vh,320px)]"
               style={{
@@ -382,38 +382,53 @@ export default function TetrisPage() {
                 row.map((val, x) => renderCell(val, x, y))
               )}
             </div>
-          </div>
 
-          {/* Game Over Overlay */}
-          {isGameOver && (
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center rounded-sm z-10 border-4 border-transparent">
-              <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-lg shadow-2xl">
-                <h2 className="text-2xl font-bold text-zinc-100 mb-2">Board Full</h2>
-                <p className="text-zinc-400 mb-6 text-sm">Take a breath. Ready to go again?</p>
+            {/* Game Over Overlay */}
+            {isGameOver && (
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center rounded-sm z-10 border-4 border-transparent">
+                <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-lg shadow-2xl">
+                  <h2 className="text-2xl font-bold text-zinc-100 mb-2">Board Full</h2>
+                  <p className="text-zinc-400 mb-6 text-sm">Take a breath. Ready to go again?</p>
+                  <button
+                    type="button"
+                    onClick={resetGame}
+                    className="px-6 py-3 bg-zinc-200 text-zinc-900 font-bold rounded hover:bg-white transition-colors uppercase tracking-wider text-sm w-full"
+                  >
+                    Restart
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Paused Overlay */}
+            {isPaused && !isGameOver && (
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center rounded-sm z-10">
+                <h2 className="text-2xl font-bold text-zinc-300 tracking-widest uppercase mb-4">Paused</h2>
                 <button
                   type="button"
-                  onClick={resetGame}
-                  className="px-6 py-3 bg-zinc-200 text-zinc-900 font-bold rounded hover:bg-white transition-colors uppercase tracking-wider text-sm w-full"
+                  onClick={togglePause}
+                  className="px-6 py-2 border-2 border-zinc-500 text-zinc-300 font-bold rounded hover:bg-zinc-800 transition-colors uppercase text-sm"
                 >
-                  Restart
+                  Resume
                 </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Paused Overlay */}
-          {isPaused && !isGameOver && (
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center rounded-sm z-10">
-              <h2 className="text-2xl font-bold text-zinc-300 tracking-widest uppercase mb-4">Paused</h2>
-              <button
-                type="button"
-                onClick={togglePause}
-                className="px-6 py-2 border-2 border-zinc-500 text-zinc-300 font-bold rounded hover:bg-zinc-800 transition-colors uppercase text-sm"
-              >
-                Resume
-              </button>
+          {/* Mobile Landscape Bottom Controls - Speed Slider */}
+          <div className="hidden landscape-short:flex w-full max-w-[min(35vw,160px)] mt-2 justify-center">
+            <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800 w-full">
+              <span className="text-[10px] uppercase text-zinc-500">Speed</span>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={speed}
+                onChange={(e) => setSpeed(parseInt(e.target.value))}
+                className="w-full accent-zinc-500 h-1"
+              />
             </div>
-          )}
+          </div>
         </div>
 
         {/* Mobile Landscape Right Controls - only visible on mobile landscape */}
@@ -570,21 +585,6 @@ export default function TetrisPage() {
           className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-4 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
         >
           <ArrowDown size={24} />
-        </div>
-      </div>
-
-      {/* Mobile Landscape Bottom Controls - Speed Slider */}
-      <div className="hidden landscape-short:flex w-full max-w-[min(35vw,160px)] mt-2 justify-center absolute bottom-1">
-        <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800 w-full">
-          <span className="text-[10px] uppercase text-zinc-500">Speed</span>
-          <input
-            type="range"
-            min="1"
-            max="10"
-            value={speed}
-            onChange={(e) => setSpeed(parseInt(e.target.value))}
-            className="w-full accent-zinc-500 h-1"
-          />
         </div>
       </div>
 
