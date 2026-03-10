@@ -197,8 +197,8 @@ export default function TetrisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-mono flex flex-col items-center py-4 px-3 md:py-8 md:px-4 selection:bg-zinc-800">
-      <div className="max-w-md w-full mb-3 md:mb-6 text-center">
+    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-mono flex flex-col items-center py-4 px-3 md:py-8 md:px-4 selection:bg-zinc-800 max-lg:landscape:flex-row max-lg:landscape:justify-center max-lg:landscape:py-1 max-lg:landscape:px-2 max-lg:landscape:gap-4 max-lg:landscape:items-stretch">
+      <div className="max-w-md w-full mb-3 md:mb-6 text-center max-lg:landscape:hidden">
         <h1 className="text-2xl md:text-3xl font-bold tracking-widest text-zinc-100 uppercase mb-1 md:mb-2">Relaxed Tetris</h1>
         <p className="text-xs md:text-sm text-zinc-500 mb-2 md:mb-4">No Score. No Levels. Just Blocks.</p>
 
@@ -224,9 +224,64 @@ export default function TetrisPage() {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-2 md:gap-8 items-center md:items-start justify-center w-full max-w-2xl">
+      <div className="flex flex-col md:flex-row gap-2 md:gap-8 items-center md:items-start justify-center w-full max-w-2xl max-lg:landscape:w-auto max-lg:landscape:items-center">
+        {/* Mobile Landscape Left Controls - only visible on mobile landscape */}
+        <div
+          className="hidden max-lg:landscape:flex flex-col gap-2 w-20 z-10 touch-none select-none"
+          role="group"
+          aria-label="Landscape Movement controls"
+          onContextMenu={(e) => e.preventDefault()}
+          style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
+        >
+          <div
+            data-move="left"
+            role="button"
+            tabIndex={0}
+            aria-label="Move Left"
+            onMouseDown={() => startRepeat("moveLeft")}
+            onMouseUp={clearRepeat}
+            onMouseLeave={clearRepeat}
+            onTouchStart={(e) => { e.preventDefault(); startRepeat("moveLeft"); }}
+            onTouchEnd={clearRepeat}
+            onTouchCancel={clearRepeat}
+            className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-3 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none mb-1"
+          >
+            <ArrowLeft size={20} />
+          </div>
+          <div
+            data-move="right"
+            role="button"
+            tabIndex={0}
+            aria-label="Move Right"
+            onMouseDown={() => startRepeat("moveRight")}
+            onMouseUp={clearRepeat}
+            onMouseLeave={clearRepeat}
+            onTouchStart={(e) => { e.preventDefault(); startRepeat("moveRight"); }}
+            onTouchEnd={clearRepeat}
+            onTouchCancel={clearRepeat}
+            className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-3 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none mb-1"
+          >
+            <ArrowRight size={20} />
+          </div>
+          <div
+            data-move="down"
+            role="button"
+            tabIndex={0}
+            aria-label="Move Down"
+            onMouseDown={() => startRepeat("moveDown")}
+            onMouseUp={clearRepeat}
+            onMouseLeave={clearRepeat}
+            onTouchStart={(e) => { e.preventDefault(); startRepeat("moveDown"); }}
+            onTouchEnd={clearRepeat}
+            onTouchCancel={clearRepeat}
+            className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-3 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
+          >
+            <ArrowDown size={20} />
+          </div>
+        </div>
+
         {/* Mobile Top Controls (Next/Hold) - only visible on small screens */}
-        <div className="flex md:hidden w-full max-w-full justify-between mt-1 px-0">
+        <div className="flex md:hidden w-full max-w-full justify-between mt-1 px-0 max-lg:landscape:hidden">
           <div className="flex flex-col gap-1 w-20 z-10">
             <div className="text-[10px] text-center uppercase text-zinc-600 font-bold">Stash</div>
             <button
@@ -317,7 +372,7 @@ export default function TetrisPage() {
         <div className="relative mt-1 md:mt-0 w-full flex justify-center">
           <div className="bg-zinc-900 border-2 md:border-4 border-zinc-800 p-1 rounded-sm shadow-2xl">
             <div
-              className="grid bg-zinc-950 w-[min(94vw,340px)] h-[min(58vh,520px)] md:w-[min(80vw,300px)] md:h-[min(160vw,600px)]"
+              className="grid bg-zinc-950 w-[min(94vw,340px)] h-[min(58vh,520px)] md:w-[min(80vw,300px)] md:h-[min(160vw,600px)] max-lg:landscape:w-[min(35vw,160px)] max-lg:landscape:h-[min(85vh,320px)]"
               style={{
                 gridTemplateColumns: `repeat(${board[0].length}, 1fr)`,
                 gap: '1px'
@@ -361,6 +416,68 @@ export default function TetrisPage() {
           )}
         </div>
 
+        {/* Mobile Landscape Right Controls - only visible on mobile landscape */}
+        <div className="hidden max-lg:landscape:flex flex-col gap-2 w-20 z-10 touch-none select-none justify-between h-[min(85vh,320px)]">
+          <div className="flex flex-col gap-1 w-full z-10">
+            <div className="text-[10px] text-center uppercase text-zinc-600 font-bold">Stash</div>
+            <button
+              type="button"
+              onClick={() => { if (!isGameOver && !isPaused) holdPiece(); }}
+              className="bg-zinc-900 border border-zinc-800 h-12 w-full mx-auto grid place-items-center rounded shadow-md cursor-pointer hover:bg-zinc-800 active:bg-zinc-700 transition-colors touch-manipulation"
+              aria-label="Stash piece"
+            >
+              {heldPiece && (
+                <div
+                  className="grid pointer-events-none"
+                  style={{
+                    gridTemplateColumns: `repeat(${heldPiece.shape[0].length}, 1fr)`,
+                    width: `${heldPiece.shape[0].length * 10}px`,
+                    gap: '1px'
+                  }}
+                >
+                  {heldPiece.shape.map((row, y) =>
+                    row.map((val, x) => (
+                      <div
+                        key={`${x}-${y}`}
+                        className={`w-2.5 h-2.5 ${val ? heldPiece.color : 'bg-transparent'}`}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={rotate}
+            className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-3 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 w-full"
+            aria-label="Rotate"
+          >
+            <RotateCw size={20} />
+          </button>
+
+          <div className="flex flex-col gap-1 items-center bg-zinc-900 p-2 rounded-lg border border-zinc-800 w-full">
+            <span className="text-[10px] uppercase text-zinc-500">Speed</span>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={speed}
+              onChange={(e) => setSpeed(parseInt(e.target.value))}
+              className="w-full accent-zinc-500 h-1"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={togglePause}
+            className="p-2 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors w-full flex justify-center"
+          >
+            {isPaused ? <Play size={16} /> : <Pause size={16} />}
+          </button>
+        </div>
+
         {/* Right column - Next */}
         <div className="hidden md:flex flex-col gap-2 w-24">
           <div className="text-xs text-center uppercase tracking-widest text-zinc-500 font-bold">Next</div>
@@ -394,7 +511,7 @@ export default function TetrisPage() {
         role="group"
         aria-label="Movement controls"
         onContextMenu={(e) => e.preventDefault()}
-        className="select-none touch-none mt-4 md:mt-8 flex justify-between gap-2 w-full max-w-md px-0 md:px-2"
+        className="select-none touch-none mt-4 md:mt-8 flex justify-between gap-2 w-full max-w-md px-0 md:px-2 max-lg:landscape:hidden"
         style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
       >
         <div
