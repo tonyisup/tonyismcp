@@ -251,9 +251,6 @@ export default function TetrisPage() {
             onMouseDown={() => startRepeat("moveLeft")}
             onMouseUp={clearRepeat}
             onMouseLeave={clearRepeat}
-            onTouchStart={(e) => { e.preventDefault(); startRepeat("moveLeft"); }}
-            onTouchEnd={clearRepeat}
-            onTouchCancel={clearRepeat}
             className="col-start-1 row-start-2 w-full h-full min-h-0 min-w-0 aspect-square bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-2 rounded-2xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
           >
             <ArrowLeft size={48} className="shrink-0" />
@@ -266,9 +263,6 @@ export default function TetrisPage() {
             onMouseDown={() => startRepeat("moveRight")}
             onMouseUp={clearRepeat}
             onMouseLeave={clearRepeat}
-            onTouchStart={(e) => { e.preventDefault(); startRepeat("moveRight"); }}
-            onTouchEnd={clearRepeat}
-            onTouchCancel={clearRepeat}
             className="col-start-3 row-start-2 w-full h-full min-h-0 min-w-0 aspect-square bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-2 rounded-2xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
           >
             <ArrowRight size={48} className="shrink-0" />
@@ -281,9 +275,6 @@ export default function TetrisPage() {
             onMouseDown={() => startRepeat("moveDown")}
             onMouseUp={clearRepeat}
             onMouseLeave={clearRepeat}
-            onTouchStart={(e) => { e.preventDefault(); startRepeat("moveDown"); }}
-            onTouchEnd={clearRepeat}
-            onTouchCancel={clearRepeat}
             className="col-start-2 row-start-3 w-full h-full min-h-0 min-w-0 aspect-square bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-2 rounded-2xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
           >
             <ArrowDown size={48} className="shrink-0" />
@@ -588,7 +579,7 @@ export default function TetrisPage() {
       </div>
 
       {/* Mobile Landscape Bottom Controls - Speed Slider */}
-      <div className="hidden landscape-short:flex absolute bottom-2 left-1/2 -translate-x-1/2 w-[min(40vw,180px)]">
+      {isPaused && <div className="hidden landscape-short:flex absolute bottom-2 left-1/2 -translate-x-1/2 w-[min(40vw,180px)]">
         <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800 w-full">
           <span className="text-[10px] uppercase text-zinc-500 whitespace-nowrap">Speed</span>
           <input
@@ -600,7 +591,7 @@ export default function TetrisPage() {
             className="w-full accent-zinc-500 h-1 flex-1 min-w-0"
           />
         </div>
-      </div>
+      </div>}
 
       {/* Desktop instructions */}
       <div className="hidden md:flex landscape-short:hidden gap-6 mt-12 text-xs text-zinc-500">
