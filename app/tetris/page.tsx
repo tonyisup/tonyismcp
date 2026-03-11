@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import { useTetris } from "./useTetris";
-import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDown } from "lucide-react";
+import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDown, ArrowDownToLine } from "lucide-react";
 
 export default function TetrisPage() {
   const {
@@ -197,7 +197,7 @@ export default function TetrisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-mono flex flex-col items-center py-4 px-3 md:py-8 md:px-4 selection:bg-zinc-800 landscape-short:flex-row landscape-short:justify-center landscape-short:py-1 landscape-short:px-2 landscape-short:gap-4 landscape-short:items-stretch">
+    <div className="min-h-screen bg-zinc-950 text-zinc-300 font-mono flex flex-col items-center py-4 px-3 md:py-8 md:px-4 selection:bg-zinc-800 landscape-short:flex-row landscape-short:justify-center landscape-short:py-1 landscape-short:px-2 landscape-short:gap-4 landscape-short:items-stretch landscape-short:relative">
       <div className="max-w-md w-full mb-3 md:mb-6 text-center landscape-short:hidden">
         <h1 className="text-2xl md:text-3xl font-bold tracking-widest text-zinc-100 uppercase mb-1 md:mb-2">Relaxed Tetris</h1>
         <p className="text-xs md:text-sm text-zinc-500 mb-2 md:mb-4">No Score. No Levels. Just Blocks.</p>
@@ -227,12 +227,22 @@ export default function TetrisPage() {
       <div className="flex flex-col md:flex-row gap-2 md:gap-8 items-center md:items-start justify-center w-full max-w-2xl landscape-short:flex-row landscape-short:w-auto landscape-short:items-center">
         {/* Mobile Landscape Left Controls - only visible on mobile landscape */}
         <div
-          className="hidden landscape-short:flex flex-col gap-2 w-16 z-10 touch-none select-none"
+          className="hidden landscape-short:grid grid-rows-[1fr_1fr_1fr] grid-cols-[1fr_1fr_1fr] gap-1.5 w-28 aspect-square z-10 touch-none select-none"
           role="group"
           aria-label="Landscape Movement controls"
           onContextMenu={(e) => e.preventDefault()}
           style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
         >
+          <div
+            data-move="left"
+            role="button"
+            tabIndex={0}
+            aria-label="Rotate"
+            onClick={rotate}
+            className="col-start-2 row-start-1 w-full h-full min-h-0 min-w-0 aspect-square bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-1 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-0.5 cursor-pointer select-none"
+          >
+            <RotateCw size={28} className="shrink-0" />
+          </div>
           <div
             data-move="left"
             role="button"
@@ -244,9 +254,9 @@ export default function TetrisPage() {
             onTouchStart={(e) => { e.preventDefault(); startRepeat("moveLeft"); }}
             onTouchEnd={clearRepeat}
             onTouchCancel={clearRepeat}
-            className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-3 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none mb-1"
+            className="col-start-1 row-start-2 w-full h-full min-h-0 min-w-0 aspect-square bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-1 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-0.5 cursor-pointer select-none"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={28} className="shrink-0" />
           </div>
           <div
             data-move="right"
@@ -259,9 +269,9 @@ export default function TetrisPage() {
             onTouchStart={(e) => { e.preventDefault(); startRepeat("moveRight"); }}
             onTouchEnd={clearRepeat}
             onTouchCancel={clearRepeat}
-            className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-3 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none mb-1"
+            className="col-start-3 row-start-2 w-full h-full min-h-0 min-w-0 aspect-square bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-1 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-0.5 cursor-pointer select-none"
           >
-            <ArrowRight size={20} />
+            <ArrowRight size={28} className="shrink-0" />
           </div>
           <div
             data-move="down"
@@ -274,9 +284,9 @@ export default function TetrisPage() {
             onTouchStart={(e) => { e.preventDefault(); startRepeat("moveDown"); }}
             onTouchEnd={clearRepeat}
             onTouchCancel={clearRepeat}
-            className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-3 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
+            className="col-start-2 row-start-3 w-full h-full min-h-0 min-w-0 aspect-square bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-1 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-0.5 cursor-pointer select-none"
           >
-            <ArrowDown size={20} />
+            <ArrowDown size={28} className="shrink-0" />
           </div>
         </div>
 
@@ -417,13 +427,37 @@ export default function TetrisPage() {
         </div>
 
         {/* Mobile Landscape Right Controls - only visible on mobile landscape */}
-        <div className="hidden landscape-short:flex flex-col gap-2 w-16 z-10 touch-none select-none justify-between h-[min(85vh,320px)]">
-          <div className="flex flex-col gap-1 w-full z-10">
+        <div className="hidden landscape-short:flex flex-col w-16 z-10 touch-none select-none h-[min(85vh,320px)]">
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-1">
+            <div className="text-[10px] text-center uppercase text-zinc-600 font-bold">Next</div>
+            <div className="bg-zinc-900 border border-zinc-800 h-12 w-full mx-auto grid place-items-center rounded shadow-md flex-shrink-0">
+              {nextPiece && (
+                <div
+                  className="grid"
+                  style={{
+                    gridTemplateColumns: `repeat(${nextPiece.shape[0].length}, 1fr)`,
+                    width: `${nextPiece.shape[0].length * 6}px`,
+                    gap: '1px'
+                  }}
+                >
+                  {nextPiece.shape.map((row, y) =>
+                    row.map((val, x) => (
+                      <div
+                        key={`${x}-${y}`}
+                        className={`w-1.5 h-1.5 ${val ? nextPiece.color : 'bg-transparent'}`}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-1">
             <div className="text-[10px] text-center uppercase text-zinc-600 font-bold">Stash</div>
             <button
               type="button"
               onClick={() => { if (!isGameOver && !isPaused) holdPiece(); }}
-              className="bg-zinc-900 border border-zinc-800 h-12 w-full mx-auto grid place-items-center rounded shadow-md cursor-pointer hover:bg-zinc-800 active:bg-zinc-700 transition-colors touch-manipulation"
+              className="bg-zinc-900 border border-zinc-800 h-12 w-full mx-auto grid place-items-center rounded shadow-md cursor-pointer hover:bg-zinc-800 active:bg-zinc-700 transition-colors touch-manipulation flex-shrink-0"
               aria-label="Stash piece"
             >
               {heldPiece && (
@@ -447,48 +481,24 @@ export default function TetrisPage() {
               )}
             </button>
           </div>
-
-          <button
-            type="button"
-            onClick={rotate}
-            className="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-3 rounded-xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 w-full"
-            aria-label="Rotate"
-          >
-            <RotateCw size={20} />
-          </button>
-
-          <div className="flex flex-col gap-1 w-full z-10">
-            <div className="text-[10px] text-center uppercase text-zinc-600 font-bold">Next</div>
-            <div className="bg-zinc-900 border border-zinc-800 h-12 w-full mx-auto grid place-items-center rounded shadow-md">
-              {nextPiece && (
-                <div
-                  className="grid"
-                  style={{
-                    gridTemplateColumns: `repeat(${nextPiece.shape[0].length}, 1fr)`,
-                    width: `${nextPiece.shape[0].length * 6}px`,
-                    gap: '1px'
-                  }}
-                >
-                  {nextPiece.shape.map((row, y) =>
-                    row.map((val, x) => (
-                      <div
-                        key={`${x}-${y}`}
-                        className={`w-1.5 h-1.5 ${val ? nextPiece.color : 'bg-transparent'}`}
-                      />
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
+          <div className="flex-1 min-h-0 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={hardDrop}
+              className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-colors w-full flex justify-center items-center border-b-4 border-zinc-900 active:border-b-0 active:translate-y-0.5"
+            >
+              <ArrowDownToLine size={24} />
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={togglePause}
-            className="p-2 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors w-full flex justify-center"
-          >
-            {isPaused ? <Play size={16} /> : <Pause size={16} />}
-          </button>
+          <div className="flex-1 min-h-0 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={togglePause}
+              className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-colors w-full flex justify-center items-center border-b-4 border-zinc-900 active:border-b-0 active:translate-y-0.5"
+            >
+              {isPaused ? <Play size={24} /> : <Pause size={24} />}
+            </button>
+          </div>
         </div>
 
         {/* Right column - Next */}
@@ -574,16 +584,16 @@ export default function TetrisPage() {
       </div>
 
       {/* Mobile Landscape Bottom Controls - Speed Slider */}
-      <div className="hidden landscape-short:flex w-full max-w-[min(35vw,160px)] mt-2 justify-center absolute bottom-1">
+      <div className="hidden landscape-short:flex absolute bottom-2 left-1/2 -translate-x-1/2 w-[min(40vw,180px)]">
         <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800 w-full">
-          <span className="text-[10px] uppercase text-zinc-500">Speed</span>
+          <span className="text-[10px] uppercase text-zinc-500 whitespace-nowrap">Speed</span>
           <input
             type="range"
             min="1"
             max="10"
             value={speed}
             onChange={(e) => setSpeed(parseInt(e.target.value))}
-            className="w-full accent-zinc-500 h-1"
+            className="w-full accent-zinc-500 h-1 flex-1 min-w-0"
           />
         </div>
       </div>
