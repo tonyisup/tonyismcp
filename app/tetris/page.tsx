@@ -238,10 +238,10 @@ export default function TetrisPage() {
             role="button"
             tabIndex={0}
             aria-label="Rotate"
-            onClick={rotate}
+            onClick={togglePause}
             className="col-start-2 row-start-1 w-full h-full min-h-0 min-w-0 aspect-square bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-2 rounded-2xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
           >
-            <RotateCw size={48} className="shrink-0" />
+            {isPaused ? <Play size={48} /> : <Pause size={48} />}
           </div>
           <div
             data-move="left"
@@ -382,7 +382,7 @@ export default function TetrisPage() {
         <div className="relative mt-1 md:mt-0 w-full flex justify-center">
           <div className="bg-zinc-900 border-2 md:border-4 border-zinc-800 p-1 rounded-sm shadow-2xl">
             <div
-              className="grid bg-zinc-950 w-[min(94vw,340px)] h-[min(58vh,520px)] md:w-[min(80vw,300px)] md:h-[min(160vw,600px)] landscape-short:w-[min(35vw,160px)] landscape-short:h-[min(85vh,320px)]"
+              className="grid bg-zinc-950 w-[min(94vw,340px)] h-[min(58vh,520px)] md:w-[min(80vw,300px)] md:h-[min(160vw,600px)] landscape-short:w-[min(40vw,220px)] landscape-short:h-[min(85vh,320px)]"
               style={{
                 gridTemplateColumns: `repeat(${board[0].length}, 1fr)`,
                 gap: '1px'
@@ -497,10 +497,10 @@ export default function TetrisPage() {
           <div className="col-start-3 row-start-2 w-full h-full min-h-0 min-w-0 flex items-center justify-center">
             <button
               type="button"
-              onClick={togglePause}
+              onClick={rotate}
               className="w-full aspect-square bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-2 rounded-2xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
             >
-              {isPaused ? <Play size={48} /> : <Pause size={48} />}
+              <RotateCw size={48} />
             </button>
           </div>
         </div>
