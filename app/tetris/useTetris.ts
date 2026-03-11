@@ -101,7 +101,7 @@ export const useTetris = () => {
   const [canHold, setCanHold] = useState(true);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [speed, setSpeed] = useState(5); // 1-10
+  const [speed, setSpeed] = useState(1); // 1-10
   const [clearingLines, setClearingLines] = useState<number[]>([]);
   const clearLinesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
