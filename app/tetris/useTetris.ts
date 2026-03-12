@@ -71,8 +71,8 @@ export interface Piece {
   type: TetrominoType;
 }
 
-const BOARD_WIDTH = 10;
-const BOARD_HEIGHT = 15;
+const BOARD_WIDTH = 15;
+const BOARD_HEIGHT = 25;
 
 // Helper to create an empty board
 const createEmptyBoard = (): Grid =>
@@ -117,7 +117,7 @@ export const useTetris = () => {
   // Calculate fall speed interval based on speed setting (1 = slowest, 10 = fastest)
   // 1: 1000ms, 10: 100ms
   const getSpeedMs = useCallback(() => {
-    return 1100 - (speed * 100);
+    return 1100 - (speed * 50);
   }, [speed]);
 
   // Initialize game
