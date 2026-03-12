@@ -373,7 +373,7 @@ export default function TetrisPage() {
         <div className="relative mt-1 md:mt-0 w-full flex justify-center">
           <div className="bg-zinc-900 border-2 md:border-4 border-zinc-800 p-1 rounded-sm shadow-2xl">
             <div
-              className="grid bg-zinc-950 w-[min(94vw,340px)] h-[min(58vh,520px)] md:w-[min(80vw,300px)] md:h-[min(160vw,600px)] landscape-short:w-[min(40vw,220px)] landscape-short:h-[min(85vh,320px)]"
+              className="grid bg-zinc-950 w-[min(94vw,340px)] h-[min(58vh,520px)] md:w-[min(80vw,300px)] md:h-[min(160vw,600px)] landscape-short:w-[min(40vw,180px)] landscape-short:h-[min(85vh,320px)]"
               style={{
                 gridTemplateColumns: `repeat(${board[0].length}, 1fr)`,
                 gap: '1px'
