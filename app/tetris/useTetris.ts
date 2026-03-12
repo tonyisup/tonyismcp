@@ -71,8 +71,8 @@ export interface Piece {
   type: TetrominoType;
 }
 
-const BOARD_WIDTH = 15;
-const BOARD_HEIGHT = 25;
+const BOARD_WIDTH = 10;
+const BOARD_HEIGHT = 20;
 
 // Helper to create an empty board
 const createEmptyBoard = (): Grid =>
