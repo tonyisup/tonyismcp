@@ -94,6 +94,7 @@ const getRandomPiece = (): Piece => {
 };
 
 export const useTetris = () => {
+  const [hardDropping, setHardDropping] = useState(false);
   const [board, setBoard] = useState<Grid>(createEmptyBoard());
   const [currentPiece, setCurrentPiece] = useState<Piece | null>(null);
   const [nextPiece, setNextPiece] = useState<Piece | null>(null);
@@ -103,6 +104,7 @@ export const useTetris = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [speed, setSpeed] = useState(1); // 1-10
   const [clearingLines, setClearingLines] = useState<number[]>([]);
+  const [placingNewPiece, setPlacingNewPiece] = useState(false);
   const clearLinesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Clear timeout on unmount
@@ -215,9 +217,13 @@ export const useTetris = () => {
              clearLinesTimeoutRef.current = null;
          }, 400); // 400ms flash duration
      } else {
-         setCurrentPiece(nextPiece);
-         setNextPiece(getRandomPiece());
-         setCanHold(true);
+      setPlacingNewPiece(true);
+      setTimeout(() => {
+        setCurrentPiece(nextPiece);
+        setNextPiece(getRandomPiece());
+        setCanHold(true);
+        setPlacingNewPiece(false);
+      }, 400);
      }
   }, [board, nextPiece]);
 
@@ -229,7 +235,8 @@ export const useTetris = () => {
 
   const moveDown = useCallback(() => {
     const piece = currentPieceRef.current;
-    if (!piece || isGameOver || isPaused) return;
+    if (!piece || isGameOver || isPaused || placingNewPiece) return;
+    if (clearingLines.length > 0) return;
 
     const newPiece = { ...piece, y: piece.y + 1 };
 
@@ -291,12 +298,16 @@ export const useTetris = () => {
   // Better hardDrop that locks immediately
   const immediateHardDrop = useCallback(() => {
      if (!currentPiece || isGameOver || isPaused) return;
+     setHardDropping(true);
      let dropY = currentPiece.y;
      while (!checkCollision({ ...currentPiece, y: dropY + 1 })) {
          dropY++;
      }
 
      commitPieceToBoard(currentPiece, dropY);
+     setTimeout(() => {
+      setHardDropping(false);
+     }, 400);
   }, [currentPiece, isGameOver, isPaused, checkCollision, commitPieceToBoard]);
 
 
@@ -375,6 +386,7 @@ export const useTetris = () => {
     isPaused,
     speed,
     clearingLines,
+    hardDropping,
     moveLeft,
     moveRight,
     moveDown,

@@ -16,6 +16,7 @@ export default function TetrisPage() {
     moveRight,
     moveDown,
     hardDrop,
+    hardDropping,
     rotate,
     holdPiece,
     resetGame,
@@ -227,7 +228,7 @@ export default function TetrisPage() {
       <div className="flex flex-col md:flex-row gap-2 md:gap-8 items-center md:items-start justify-center w-full max-w-2xl landscape-short:flex-row landscape-short:w-auto landscape-short:items-center">
         {/* Mobile Landscape Left Controls - only visible on mobile landscape */}
         <div
-          className="hidden landscape-short:grid grid-rows-[1fr_1fr_1fr] grid-cols-[1fr_1fr_1fr] gap-2 w-56 aspect-square z-10 touch-none select-none landscape-short:absolute landscape-short:left-8 landscape-short:bottom-10"
+          className="ml-8 hidden landscape-short:grid grid-rows-[1fr_1fr_1fr] grid-cols-[1fr_1fr_1fr] gap-2 w-56 aspect-square z-10 touch-none select-none landscape-short:absolute landscape-short:left-8 landscape-short:bottom-10"
           role="group"
           aria-label="Landscape Movement controls"
           onContextMenu={(e) => e.preventDefault()}
@@ -430,7 +431,7 @@ export default function TetrisPage() {
 
         {/* Mobile Landscape Right Controls - only visible on mobile landscape */}
         <div
-          className="hidden landscape-short:grid grid-rows-[1fr_1fr_1fr] grid-cols-[1fr_1fr_1fr] gap-2 w-56 aspect-square z-10 touch-none select-none landscape-short:absolute landscape-short:right-8 landscape-short:bottom-10"
+          className="hidden mr-8 landscape-short:grid grid-rows-[1fr_1fr_1fr] grid-cols-[1fr_1fr_1fr] gap-2 w-56 aspect-square z-10 touch-none select-none landscape-short:absolute landscape-short:right-8 landscape-short:bottom-10"
           role="group"
           aria-label="Landscape Right Controls"
         >
@@ -491,6 +492,7 @@ export default function TetrisPage() {
             <button
               type="button"
               onClick={hardDrop}
+              disabled={hardDropping}
               className="w-full aspect-square bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 p-2 rounded-2xl flex items-center justify-center touch-manipulation transition-colors border-b-4 border-zinc-900 active:border-b-0 active:translate-y-1 cursor-pointer select-none"
             >
               <ArrowDownToLine size={48} />
