@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import { useTetris } from "./useTetris";
+import { useGamepad } from "./useGamepad";
 import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDown, ArrowDownToLine } from "lucide-react";
 
 export default function TetrisPage() {
@@ -75,6 +76,15 @@ export default function TetrisPage() {
       }, REPEAT_INTERVAL);
     }, REPEAT_DELAY);
   }, [isGameOver, isPaused, clearRepeat]);
+
+  // Integrate Gamepad Support
+  useGamepad({
+    rotate,
+    togglePause,
+    holdPiece,
+    startRepeat,
+    clearRepeat,
+  });
 
   useEffect(() => {
     const el = controlsRef.current;
