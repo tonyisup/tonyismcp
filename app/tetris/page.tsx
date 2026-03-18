@@ -6,6 +6,34 @@ import { useGamepad } from "./useGamepad";
 import { Play, Pause, RotateCw, ArrowLeft, ArrowRight, ArrowDown, ArrowDownToLine } from "lucide-react";
 
 export default function TetrisPage() {
+  const [debugGamepad, setDebugGamepad] = useState<string>("No gamepad detected");
+
+  useEffect(() => {
+    let animationFrameId: number;
+    const updateDebug = () => {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      const gp = gamepads[0]; // Just check the first one for debug
+
+      if (gp) {
+        let debugStr = `Gamepad: ${gp.id}\n`;
+        debugStr += `Axes: ${gp.axes.map(a => a.toFixed(2)).join(', ')}\n`;
+        debugStr += `Buttons:\n`;
+        gp.buttons.forEach((b, i) => {
+          if (b.pressed) {
+            debugStr += `  [${i}]: pressed\n`;
+          }
+        });
+        setDebugGamepad(debugStr);
+      } else {
+        setDebugGamepad("No gamepad detected");
+      }
+      animationFrameId = requestAnimationFrame(updateDebug);
+    };
+
+    animationFrameId = requestAnimationFrame(updateDebug);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, []);
+
   const {
     board,
     currentPiece,
@@ -209,6 +237,11 @@ export default function TetrisPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-300 font-mono flex flex-col items-center py-4 px-3 md:py-8 md:px-4 selection:bg-zinc-800 landscape-short:flex-row landscape-short:justify-center landscape-short:py-1 landscape-short:px-2 landscape-short:gap-4 landscape-short:items-stretch landscape-short:relative">
+      {/* Gamepad Debug Overlay */}
+      <div className="fixed top-2 left-2 z-50 bg-black/80 text-green-400 font-mono text-xs p-2 rounded pointer-events-none whitespace-pre-wrap max-w-xs border border-green-900/50">
+        {debugGamepad}
+      </div>
+
       <div className="max-w-md w-full mb-3 md:mb-6 text-center landscape-short:hidden">
         <h1 className="text-2xl md:text-3xl font-bold tracking-widest text-zinc-100 uppercase mb-1 md:mb-2">Relaxed Tetris</h1>
         <p className="text-xs md:text-sm text-zinc-500 mb-2 md:mb-4">No Score. No Levels. Just Blocks.</p>

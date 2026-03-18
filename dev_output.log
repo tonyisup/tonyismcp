@@ -7,15 +7,8 @@
    - Network:      http://192.168.0.2:3001
 
  ✓ Starting...
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-
- ✓ Ready in 1624ms
+ ✓ Ready in 1385ms
  ○ Compiling /tetris ...
- ✓ Compiled /tetris in 7.1s
- GET /tetris 200 in 7983ms
- GET /tetris 200 in 1054ms
- GET /tetris 200 in 467ms
- GET /tetris 200 in 274ms
+ ✓ Compiled /tetris in 6.9s
+ GET /tetris 200 in 7893ms
+ GET /tetris 200 in 230ms
