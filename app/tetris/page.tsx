@@ -12,18 +12,30 @@ export default function TetrisPage() {
     let animationFrameId: number;
     const updateDebug = () => {
       const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-      const gp = gamepads[0]; // Just check the first one for debug
+      let debugStr = "";
 
-      if (gp) {
-        let debugStr = `Gamepad: ${gp.id}\n`;
-        debugStr += `Axes: ${gp.axes.map(a => a.toFixed(2)).join(', ')}\n`;
-        debugStr += `Buttons:\n`;
-        gp.buttons.forEach((b, i) => {
-          if (b.pressed) {
-            debugStr += `  [${i}]: pressed\n`;
+      for (let i = 0; i < gamepads.length; i++) {
+        const gp = gamepads[i];
+        if (gp) {
+          debugStr += `Gamepad ${i}: ${gp.id}\n`;
+          debugStr += `Axes: ${gp.axes.map(a => a.toFixed(2)).join(', ')}\n`;
+          debugStr += `Buttons:\n`;
+          let hasButtons = false;
+          gp.buttons.forEach((b, j) => {
+            if (b.pressed) {
+              debugStr += `  [${j}]: pressed\n`;
+              hasButtons = true;
+            }
+          });
+          if (!hasButtons) {
+            debugStr += `  (none pressed)\n`;
           }
-        });
-        setDebugGamepad(debugStr);
+          debugStr += `\n`;
+        }
+      }
+
+      if (debugStr) {
+        setDebugGamepad(debugStr.trim());
       } else {
         setDebugGamepad("No gamepad detected");
       }

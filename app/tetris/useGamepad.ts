@@ -67,8 +67,7 @@ export function useGamepad(actions: GamepadActions) {
           stash = true;
         }
 
-        // We only process the first active gamepad
-        break;
+        // Process all active gamepads
       }
 
       // Movement logic (start/clear repeat)
