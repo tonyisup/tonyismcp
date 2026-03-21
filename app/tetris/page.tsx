@@ -219,8 +219,8 @@ export default function TetrisPage() {
       bgColor = currentPiece!.color;
       borderColor = "border-white/20";
     } else if (isShadow) {
-      bgColor = "bg-zinc-700/50";
-      borderColor = currentPiece!.color.replace("bg-", "border-");
+      bgColor = "bg-transparent";
+      borderColor = "border-white";
     } else if (value) {
       // It's a locked block
       bgColor = value as string;
