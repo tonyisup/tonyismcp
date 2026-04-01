@@ -115,11 +115,8 @@ export default function CoreBeliefsPage() {
         <section className="mb-12">
           <div className="bg-yellow-400 border-[3px] border-black p-6 shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
             <p className="font-bold text-lg leading-relaxed">
-              This is a living essay — a record of convictions that keep surfacing in my work, my decisions, and the projects I can&apos;t stop thinking about. It will change as I change. The ideas below aren&apos;t finished. They&apos;re{" "}
+              These are living essays — a record of convictions that keep surfacing in my work, my decisions, and the projects I can&apos;t stop thinking about. It will change as I change. The ideas below probably aren&apos;t finished. They&apos;re more like{" "}
               <span className="underline decoration-[4px] decoration-black">directions</span>.
-            </p>
-            <p className="font-bold text-sm mt-4 opacity-75">
-              Each belief is its own file. Edit them independently, draft without distraction. The page stitches them into one scroll.
             </p>
           </div>
         </section>
@@ -186,10 +183,8 @@ export default function CoreBeliefsPage() {
               Why This Exists
             </h2>
             <p className="font-bold leading-relaxed mb-4">
-              These beliefs show up in everything I build, whether I intend them to
-              or not. Writing them down is an attempt at clarity — not finality.
-              If I come back in six months and half of these look naive,
-              that&apos;s a success.
+              These thoughts have bubbled up throughout my life and are starting to show up in all my personal work, whether I intend them to
+              or not. Writing them down is an attempt at clarity — posting the here is an attempt at thinking in public. 
             </p>
             <p className="font-bold leading-relaxed">
               The essay is versionless on purpose — it&apos;s current, not complete.
