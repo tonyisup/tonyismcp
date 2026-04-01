@@ -5,6 +5,7 @@ import { GitHubIcon, KoFiIcon, LinkedInIcon, InstagramIcon, FacebookIcon, Twitte
 import Link from "next/link";
 import { BrutalistCard } from "@/components/ui/brutalist-card";
 import { BrutalistButton } from "@/components/ui/brutalist-button";
+import { cn } from "@/lib/utils";
 
 export default function HomePage() {
   return (
@@ -16,12 +17,12 @@ export default function HomePage() {
             <motion.h1
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              className="text-5xl md:text-7xl font-black uppercase leading-none mb-4"
+              className="text-2xl md:text-5xl font-black uppercase leading-none mb-4"
             >
               Tony<br />Is<br />Up
             </motion.h1>
             <div className="bg-yellow-400 border-[3px] border-black p-4 mb-6 rotate-[-2deg]">
-              <p className="font-bold uppercase italic underline">Antonio Villanueva</p>
+              <p className="font-bold uppercase italic">Antonio Villanueva</p>
               <p className="text-sm">STEM • EDM • ENM</p>
             </div>
           </div>
@@ -32,6 +33,20 @@ export default function HomePage() {
               Everything is a learning experience. Help others. Fail eagerly.
             </p>
           </div>
+          <motion.div
+            whileHover={{ scale: 1.01, x: 4, y: -4 }}
+            className={cn(
+              "mt-6 bg-gray-400 hover:bg-yellow-50 transition-colors border-[3px] border-black p-4 rotate-[2deg]",
+            )}
+          >
+            <Link href="/core-beliefs">
+              <div>
+                <p className="font-bold uppercase italic underline text-center">
+                  Core Beliefs
+                </p>
+              </div>
+            </Link>
+          </motion.div>
 
           <div className="space-y-4 pt-6">
             <h2 className="text-2xl font-black uppercase bg-black text-white px-2 py-1 inline-block">Bio</h2>
@@ -57,6 +72,12 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 gap-8 flex-grow">
+            <BrutalistCard
+              title="Core Beliefs"
+              description="A living essay — the convictions driving my work. Semantic drift, abstraction, failing eagerly, and the gaps between us."
+              link="/core-beliefs"
+              tag="THOUGHTWARE"
+            />
             <BrutalistCard
               title="Bad Boys Podcast"
               description="Co-hosting and engineering a weekly podcast about movies and pop culture. Over ten years of terrible fun."
