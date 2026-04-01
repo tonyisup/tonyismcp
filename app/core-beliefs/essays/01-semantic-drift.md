@@ -8,4 +8,5 @@ A shared label is not proof of a shared concept.
 
 A word is a hook. What hangs on the hook depends on everything that person has ever lived through. The word "freedom" hooks entirely different objects in two different minds. The word "respect" hooks different expectations, different memories, different pain thresholds. Same hook, different weight.
 
-This belief is what drives my work on App Spec Generator, Semantics, and the Semantic Abstraction Graph. Not because I want perfect definitions. Because I want better bridges.
+This belief is what drives my work on App Spec Generator, Semantics, and the Semantic Abstraction Graph. Not because I want perfect definitions. Because I want better bridges. Between all of us, including AI.
+ 
