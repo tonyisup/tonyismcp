@@ -1,4 +1,6 @@
-Life is just a loop. It started as molecules that happened to get complicated enough to exist in a self-contained loop. This was the first knowledge increase - the collection of molecules necessary for this loop. 
+# Life is just a loop
+
+It started as molecules that happened to get complicated enough to exist in a self-contained loop. This was the first knowledge increase - the collection of molecules necessary for this loop. 
 
 Over time measured in eons those molecules gained more complexity, continuing to spin in their knowledge gathering loop until it evolved into the life we understand today. 
 
