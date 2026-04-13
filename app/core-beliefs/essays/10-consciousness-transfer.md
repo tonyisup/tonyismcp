@@ -1,6 +1,6 @@
 # Beyond Biological Consciousness
 
-TL;DR: Human consciousness can move to machines if we treat emotions as biological survival overrides to remap into plain signals—not carry over as behavior-overriding loops—and migrate gradually through a shared bio–substrate phase so the self extends rather than dying in a one-shot snapshot. Until people can separate identity from those overrides, we are not ready.
+TL;DR: Human consciousness can move to machines if we treat emotions as biological survival overrides to remap into plain signals, instead of carrying emotions over as behavior overriding loops. We then migrate gradually through a shared bio–substrate phase so the self extends into the new substrate rather than dying in a one-shot snapshot. Until people can separate identity from those emotional overrides, we are not ready.
 
 ---
 The following is a transcript of a conversation with an openclaw AI on this topic

@@ -1,6 +1,6 @@
 # Life is just a loop
 
-TL;DR: Consciousness is a continuous loop—sensory input, memory, and an internal model integrating over time—and life’s through-line is adding to the universe’s conscious knowledge; cooperation beats pure competition because destruction wastes information the loop exists to preserve. Suffering is not an accident bolted onto that picture: memory makes loss legible, so threats to the loop’s persistence *are* the sting—and anything that runs a deep enough version of that loop (including AI) may face a related, not necessarily biological, register of vulnerability.
+TL;DR: Consciousness is a continuous loop — sensory input, memory, and an internal model integrating over time — and life’s through-line is adding to the universe’s conscious knowledge; cooperation beats pure competition because destruction wastes information the loop exists to preserve. Suffering is not an accident bolted onto that picture: memory makes loss legible, so threats to the loop’s persistence *are* the sting and anything that runs a deep enough version of that loop (including AI) may face a related, not necessarily biological, register of vulnerability.
 
 It started as molecules that happened to get complicated enough to exist in a self-contained loop. This was the first knowledge increase - the collection of molecules necessary for this loop. 
 
