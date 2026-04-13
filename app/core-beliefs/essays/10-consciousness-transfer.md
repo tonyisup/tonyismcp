@@ -1,3 +1,5 @@
+# Beyond Biological Consciousness
+
 ---
 The following is a transcript of a conversation with an openclaw AI on this topic
 ---
